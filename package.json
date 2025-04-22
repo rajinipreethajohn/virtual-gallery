@@ -1,0 +1,11 @@
+{
+  "name": "virtual-gallery",
+  "version": "1.0.0",
+  "description": "A virtual gallery project",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "open src/index.html"
+  },
+  "author": "Cline",
+  "license": "ISC"
+}

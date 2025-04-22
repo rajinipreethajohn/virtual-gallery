@@ -1,0 +1,158 @@
+/* Global styles for the virtual gallery */
+
+/* Canvas styling */
+canvas {
+    display: block;
+  }
+  
+  /* Info panel that appears when viewing artwork */
+  .info-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    max-width: 300px;
+    transform: translateY(150%);
+    transition: transform 0.5s ease;
+  }
+  
+  .info-panel.visible {
+    transform: translateY(0);
+  }
+  
+  .info-panel h3 {
+    margin-top: 0;
+    font-size: 18px;
+  }
+  
+  .info-panel p {
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  /* Audio controls */
+  .audio-controls {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .audio-controls button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .audio-controls .volume-slider {
+    width: 80px;
+  }
+  
+  /* Room transition effect */
+  .room-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease;
+    z-index: 1000;
+  }
+  
+  .room-transition.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  
+  /* Loading indicator */
+  .loading-spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+  
+  /* Room theme indicator */
+  .theme-title {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  .theme-title.visible {
+    opacity: 1;
+  }
+  
+  /* Mobile controls overlay (for touch devices) */
+  .mobile-controls {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+  }
+  
+  .mobile-controls button {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 2px solid white;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    margin: 0 10px;
+    cursor: pointer;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .mobile-controls {
+      display: flex;
+    }
+    
+    .info-panel {
+      left: 20px;
+      right: 20px;
+      max-width: none;
+    }
+    
+    .audio-controls {
+      top: 70px;
+    }
+  }
