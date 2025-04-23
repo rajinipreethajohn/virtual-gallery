@@ -4,17 +4,22 @@ import { scene, camera, renderer } from './utils/three-setup.js';
 import { createRoom, addArtwork } from './components/Gallery.js';
 import { controls, velocity, direction, moveForward, moveBackward, moveLeft, moveRight } from './components/Controls.js';
 import { setupAudio } from './components/AudioPlayer.js';
+import { ArtworkManager } from './components/Artwork.js';
 
 document.body.appendChild(renderer.domElement);
 
+const artworkManager = new ArtworkManager(scene, camera);
+
 createRoom();
-addArtwork();
+addArtwork(artworkManager);
 setupAudio();
 
 // Collision detection
 const raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
 
 // Render loop
+let roomLength = 20; // Define roomLength outside the functions
+
 const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
@@ -39,7 +44,6 @@ function animate() {
     // Keep within room boundaries
     const margin = 0.5; // Distance from walls
     const roomWidth = 20;
-    const roomLength = 20;
     if (camera.position.x < -roomWidth/2 + margin) camera.position.x = -roomWidth/2 + margin;
     if (camera.position.x > roomWidth/2 - margin) camera.position.x = roomWidth/2 - margin;
     if (camera.position.z < -roomLength/2 + margin) camera.position.z = -roomLength/2 + margin;
@@ -58,8 +62,6 @@ window.addEventListener('resize', () => {
 
 // Initialize everything
 function init() {
-  createRoom();
-  addArtwork();
   setupAudio();
   
   // Initial camera position
