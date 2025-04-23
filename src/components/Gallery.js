@@ -12,81 +12,182 @@ const artHeight = 2.5;
 
 function createRoom() {
   const roomGeometry = new THREE.BoxGeometry(roomWidth, roomHeight, roomLength);
-  const roomMaterial = new THREE.MeshStandardMaterial({ color: 0x808080, side: THREE.BackSide });
+  const roomMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0x101010,  // Very dark gray, almost black
+    side: THREE.BackSide,
+    roughness: 0.9,   // Very rough to minimize reflections
+    metalness: 0.1    // Low metalness for a matte finish
+  });
   const room = new THREE.Mesh(roomGeometry, roomMaterial);
-  room.receiveShadow = true; // Allow the room to receive shadows
+  room.receiveShadow = true;
   scene.add(room);
 
   // Add a floor (slightly below the room) to catch light
   const floorGeometry = new THREE.PlaneGeometry(roomWidth, roomLength);
-  const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+  const floorMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0x101010,  // Match wall color
+    roughness: 0.8,   // Slightly less rough than walls
+    metalness: 0.2    // Slightly more metallic than walls
+  });
   const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -0.1; // Position just below the room
+  floor.position.y = -0.1;
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // Add ambient light
-  const ambientLight = new THREE.AmbientLight(0x606060); // Soft white light
+  // Add very dim ambient light for minimal base illumination
+  const ambientLight = new THREE.AmbientLight(0x202020, 0.2); // Darker, less intense
   scene.add(ambientLight);
 
-  // Add directional light (acting as sunlight)
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  directionalLight.position.set(roomWidth / 2, roomHeight, roomLength / 2);
-  directionalLight.castShadow = true;
+  // Create ceiling tracks
+  const trackMaterial = new THREE.MeshStandardMaterial({
+    color: 0x202020,
+    metalness: 0.8,
+    roughness: 0.2
+  });
 
-  // Configure shadow properties
-  directionalLight.shadow.mapSize.width = 1024;
-  directionalLight.shadow.mapSize.height = 1024;
-  directionalLight.shadow.camera.near = 0.5;
-  directionalLight.shadow.camera.far = 50;
-  scene.add(directionalLight);
+  // Main horizontal track
+  const horizontalTrackGeometry = new THREE.BoxGeometry(roomWidth - 1, 0.1, 0.2);
+  const horizontalTrack = new THREE.Mesh(horizontalTrackGeometry, trackMaterial);
+  horizontalTrack.position.set(0, roomHeight - 0.15, 0);
+  scene.add(horizontalTrack);
+
+  // Cross tracks for front and back spotlights
+  const crossTrackGeometry = new THREE.BoxGeometry(0.2, 0.1, roomLength - 1);
+  const frontTrack = new THREE.Mesh(crossTrackGeometry, trackMaterial);
+  frontTrack.position.set(0, roomHeight - 0.15, 0);
+  scene.add(frontTrack);
+
+  // Add track connectors at intersections
+  const connectorGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.15, 16);
+  const connectorMaterial = new THREE.MeshStandardMaterial({
+    color: 0x303030,
+    metalness: 0.9,
+    roughness: 0.1
+  });
+  const connector = new THREE.Mesh(connectorGeometry, connectorMaterial);
+  connector.rotation.x = Math.PI / 2;
+  connector.position.set(0, roomHeight - 0.15, 0);
+  scene.add(connector);
+
+  // Add ceiling track lights for each artwork position
+  const artworkPositions = [
+    // Left wall artwork
+    { pos: [-roomWidth / 2 + 0.05, roomHeight - 0.2, roomLength / 3], rot: new THREE.Euler(0, Math.PI / 2, 0) },
+    // Right wall artwork
+    { pos: [roomWidth / 2 - 0.05, roomHeight - 0.2, -roomLength / 3], rot: new THREE.Euler(0, -Math.PI / 2, 0) },
+    // Back wall artwork
+    { pos: [0, roomHeight - 0.2, -roomLength / 2 + 0.05], rot: new THREE.Euler(0, 0, 0) },
+    // Front wall artwork
+    { pos: [0, roomHeight - 0.2, roomLength / 2 - 0.05], rot: new THREE.Euler(0, Math.PI, 0) }
+  ];
+
+  artworkPositions.forEach(({ pos, rot }) => {
+    // Create spotlight housing (black cylinder)
+    const housingGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.3, 16);
+    const housingMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x000000,
+      metalness: 0.7,
+      roughness: 0.3
+    });
+    const housing = new THREE.Mesh(housingGeometry, housingMaterial);
+    housing.position.set(pos[0], pos[1], pos[2]);
+    housing.rotation.x = Math.PI / 2; // Point cylinder downward
+    scene.add(housing);
+
+    // Create spotlight
+    const spotLight = new THREE.SpotLight(0xffffff, 3.5); // Increased intensity
+    spotLight.position.set(pos[0], pos[1], pos[2]);
+    
+    // Calculate target position based on artwork position and rotation
+    const targetOffset = new THREE.Vector3(0, -1.5, 0); // Adjusted target distance
+    targetOffset.applyEuler(rot);
+    
+    const target = new THREE.Object3D();
+    target.position.set(
+      pos[0] + targetOffset.x,
+      pos[1] + targetOffset.y,
+      pos[2] + targetOffset.z
+    );
+    scene.add(target);
+    spotLight.target = target;
+
+    // Configure spotlight for dramatic lighting
+    spotLight.angle = Math.PI / 16;      // Even narrower beam
+    spotLight.penumbra = 0.1;            // Sharper edges
+    spotLight.decay = 1.0;               // Less decay for stronger light
+    spotLight.distance = 6;              // Shorter distance for more intensity
+    spotLight.castShadow = true;
+    spotLight.power = 40;                // Increased power for more dramatic effect
+
+    // High-quality shadows
+    spotLight.shadow.mapSize.width = 2048;
+    spotLight.shadow.mapSize.height = 2048;
+    spotLight.shadow.camera.near = 0.1;
+    spotLight.shadow.camera.far = 10;
+    spotLight.shadow.focus = 1;
+    spotLight.shadow.bias = -0.0001;     // Reduce shadow artifacts
+
+    scene.add(spotLight);
+  });
 }
 
 function addArtwork(artworkManager) {
   const artworkData = [
     {
       imagePath: '/assets/images/FaceDisguise.png',
-      position: new THREE.Vector3(-roomWidth / 2 + 0.05, 3.167, roomLength / 3),
+      position: new THREE.Vector3(-roomWidth / 2 + 0.05, 2.5, roomLength / 3),
       rotation: new THREE.Euler(0, Math.PI / 2, 0),
       metadata: {
         title: 'Face Disguise',
         artist: 'Unknown',
         description: 'A mysterious face.',
-        year: 'Unknown'
+        year: 'Unknown',
+        spotlight: true,
+        spotlightColor: 0xffffff,
+        frame: true
       }
     },
     {
       imagePath: '/assets/images/ManWoman.png',
-      position: new THREE.Vector3(roomWidth / 2 - 0.05, 3.167, -roomLength / 3),
+      position: new THREE.Vector3(roomWidth / 2 - 0.05, 2.5, -roomLength / 3),
       rotation: new THREE.Euler(0, -Math.PI / 2, 0),
       metadata: {
         title: 'Man Woman',
         artist: 'Unknown',
         description: 'A depiction of duality.',
-        year: 'Unknown'
+        year: 'Unknown',
+        spotlight: true,
+        spotlightColor: 0xffffff,
+        frame: true
       }
     },
     {
       imagePath: '/assets/images/VeinsOfTheCosmos.png',
-      position: new THREE.Vector3(0, 3.167, -roomLength / 2 + 0.05),
+      position: new THREE.Vector3(0, 2.5, -roomLength / 2 + 0.05),
       rotation: new THREE.Euler(0, 0, 0),
       metadata: {
         title: 'Veins of the Cosmos',
         artist: 'Unknown',
         description: 'Cosmic connections.',
-        year: 'Unknown'
+        year: 'Unknown',
+        spotlight: true,
+        spotlightColor: 0xffffff,
+        frame: true
       }
     },
     {
       imagePath: '/assets/images/ThreeSisters.png',
-      position: new THREE.Vector3(0, 3.167, roomLength / 2 - 0.05),
+      position: new THREE.Vector3(0, 2.5, roomLength / 2 - 0.05),
       rotation: new THREE.Euler(0, Math.PI, 0),
       metadata: {
         title: 'Three Sisters',
         artist: 'Unknown',
         description: 'A bond of sisterhood.',
-        year: 'Unknown'
+        year: 'Unknown',
+        spotlight: true,
+        spotlightColor: 0xffffff,
+        frame: true
       }
     },
     {
@@ -97,7 +198,10 @@ function addArtwork(artworkManager) {
         title: 'Center Image',
         artist: 'Unknown',
         description: 'A central piece.',
-        year: 'Unknown'
+        year: 'Unknown',
+        spotlight: true,
+        spotlightColor: 0xffffff,
+        frame: true
       }
     }
   ];

@@ -8,19 +8,17 @@ import { ArtworkManager } from './components/Artwork.js';
 
 document.body.appendChild(renderer.domElement);
 
+// Initialize components
 const artworkManager = new ArtworkManager(scene, camera);
+const clock = new THREE.Clock();
 
-createRoom();
-addArtwork(artworkManager);
-setupAudio();
+// Room dimensions (shared between Gallery.js and boundary checks)
+const roomLength = 20;
 
 // Collision detection
 const raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
 
 // Render loop
-let roomLength = 20; // Define roomLength outside the functions
-
-const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
   
@@ -50,6 +48,9 @@ function animate() {
     if (camera.position.z > roomLength/2 - margin) camera.position.z = roomLength/2 - margin;
   }
   
+  // Update artwork proximity detection
+  artworkManager.update();
+  
   renderer.render(scene, camera);
 }
 
@@ -62,6 +63,11 @@ window.addEventListener('resize', () => {
 
 // Initialize everything
 function init() {
+  // Create the room and add artwork
+  createRoom();
+  addArtwork(artworkManager);
+  
+  // Setup audio (this adds its own start button)
   setupAudio();
   
   // Initial camera position
@@ -73,11 +79,12 @@ function init() {
     <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
                 background: rgba(0,0,0,0.5); color: white; padding: 10px; border-radius: 5px; 
                 font-family: Arial, sans-serif; text-align: center;">
-      <p>Click to start | Move: W,A,S,D or Arrow Keys | Look: Mouse</p>
+      <p>Click to start | Move: W,A,S,D or Arrow Keys | Look: Mouse | Approach artwork for details</p>
     </div>
   `;
   document.body.appendChild(instructions);
   
+  // Start the render loop
   animate();
 }
 

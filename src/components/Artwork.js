@@ -50,11 +50,16 @@ export class ArtworkManager {
         const width = scale.x;
         const height = width / aspectRatio;
         
-        // Create the artwork mesh
+        // Create the artwork mesh with enhanced material
         const geometry = new THREE.PlaneGeometry(width, height);
         const material = new THREE.MeshStandardMaterial({
           map: texture,
-          side: THREE.DoubleSide
+          side: THREE.DoubleSide,
+          metalness: 0.1,
+          roughness: 0.4,
+          emissive: new THREE.Color(0xffffff),
+          emissiveIntensity: 0.15,
+          emissiveMap: texture
         });
         
         const artwork = new THREE.Mesh(geometry, material);
@@ -62,6 +67,26 @@ export class ArtworkManager {
         artwork.rotation.copy(rotation);
         artwork.castShadow = true;
         artwork.receiveShadow = true;
+
+        // Add a subtle glow plane behind the artwork
+        const glowGeometry = new THREE.PlaneGeometry(width + 0.1, height + 0.1);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.15,
+          side: THREE.DoubleSide
+        });
+        
+        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        glow.position.copy(position);
+        glow.rotation.copy(rotation);
+        
+        // Move glow slightly behind artwork
+        const offset = new THREE.Vector3(0, 0, -0.02);
+        offset.applyEuler(rotation);
+        glow.position.add(offset);
+        
+        this.scene.add(glow);
         
         // Add to scene
         this.scene.add(artwork);
@@ -120,14 +145,16 @@ export class ArtworkManager {
   
   // Add a spotlight focused on the artwork
   addSpotlight(artworkMesh, position, color) {
-    const spotLight = new THREE.SpotLight(color, 1.5);
+    const spotLight = new THREE.SpotLight(color, 2.5); // Increased intensity
     
     // Position the light based on artwork orientation
     const direction = new THREE.Vector3(0, 0, 1);
     direction.applyEuler(artworkMesh.rotation);
-    direction.multiplyScalar(-3); // Move light 3 units "in front" of artwork
+    direction.multiplyScalar(-2); // Moved closer to artwork (2 units instead of 3)
     
-    spotLight.position.copy(position).add(direction);
+    // Offset the light position slightly upward
+    const upOffset = new THREE.Vector3(0, 0.5, 0);
+    spotLight.position.copy(position).add(direction).add(upOffset);
     
     // Calculate position for the light to point at the artwork
     const target = new THREE.Object3D();
@@ -135,12 +162,19 @@ export class ArtworkManager {
     this.scene.add(target);
     spotLight.target = target;
     
-    // Configure spotlight
-    spotLight.angle = Math.PI / 6;
-    spotLight.penumbra = 0.2;
-    spotLight.decay = 2;
-    spotLight.distance = 20;
+    // Configure spotlight for more focused, dramatic lighting
+    spotLight.angle = Math.PI / 8;        // Narrower angle
+    spotLight.penumbra = 0.3;             // Softer edges
+    spotLight.decay = 1.5;                // Less decay for stronger light
+    spotLight.distance = 10;              // Shorter distance for more intensity
     spotLight.castShadow = true;
+    
+    // Higher quality shadows
+    spotLight.shadow.mapSize.width = 2048;
+    spotLight.shadow.mapSize.height = 2048;
+    spotLight.shadow.camera.near = 0.1;
+    spotLight.shadow.camera.far = 15;
+    spotLight.shadow.focus = 1;           // Sharp shadows
     
     this.scene.add(spotLight);
     return spotLight;
