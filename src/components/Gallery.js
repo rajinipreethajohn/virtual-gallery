@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { scene } from '../utils/three-setup.js';
 
+// Texture Loader
+const textureLoader = new THREE.TextureLoader();
+
 // Room dimensions
 const roomWidth = 20;
 const roomHeight = 12;
@@ -11,51 +14,57 @@ const artWidth = 3.5;
 const artHeight = 2.5;
 
 function createRoom() {
+  // Walls
   const roomGeometry = new THREE.BoxGeometry(roomWidth, roomHeight, roomLength);
-  const roomMaterial = new THREE.MeshStandardMaterial({ 
-    color: 0x101010,  // Very dark gray, almost black
+  const roomMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffffff,  // Bright white walls
     side: THREE.BackSide,
-    roughness: 0.9,   // Very rough to minimize reflections
-    metalness: 0.1    // Low metalness for a matte finish
+    roughness: 0.8,   // Slightly less rough for a bit more light bounce
+    metalness: 0.1
   });
   const room = new THREE.Mesh(roomGeometry, roomMaterial);
   room.receiveShadow = true;
   scene.add(room);
 
-  // Add a floor (slightly below the room) to catch light
+  // Floor with texture
+  const floorTexture = textureLoader.load('/assets/textures/medieval_wood.jpg');
+  floorTexture.wrapS = THREE.RepeatWrapping; // Repeat horizontally
+  floorTexture.wrapT = THREE.RepeatWrapping; // Repeat vertically
+  floorTexture.repeat.set(4, 4); // How many times to repeat the texture
+
   const floorGeometry = new THREE.PlaneGeometry(roomWidth, roomLength);
-  const floorMaterial = new THREE.MeshStandardMaterial({ 
-    color: 0x101010,  // Match wall color
-    roughness: 0.8,   // Slightly less rough than walls
-    metalness: 0.2    // Slightly more metallic than walls
+  const floorMaterial = new THREE.MeshStandardMaterial({
+    map: floorTexture,
+    roughness: 0.7,
+    metalness: 0.1
   });
   const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -0.1;
+  floor.position.y = -0.05; // Slightly raise floor to avoid z-fighting if needed
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // Add very dim ambient light for minimal base illumination
-  const ambientLight = new THREE.AmbientLight(0x202020, 0.2); // Darker, less intense
+  // Brighter ambient light for overall illumination
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // White, much brighter
   scene.add(ambientLight);
 
-  // Create ceiling tracks
+  // Create ceiling tracks (lighter color)
   const trackMaterial = new THREE.MeshStandardMaterial({
-    color: 0x202020,
-    metalness: 0.8,
-    roughness: 0.2
+    color: 0xcccccc, // Light gray
+    metalness: 0.6,
+    roughness: 0.4
   });
 
   // Main horizontal track
   const horizontalTrackGeometry = new THREE.BoxGeometry(roomWidth - 1, 0.1, 0.2);
   const horizontalTrack = new THREE.Mesh(horizontalTrackGeometry, trackMaterial);
-  horizontalTrack.position.set(0, roomHeight - 0.15, 0);
+  horizontalTrack.position.set(0, roomHeight / 2 - 0.15, 0); // Corrected Y position
   scene.add(horizontalTrack);
 
   // Cross tracks for front and back spotlights
   const crossTrackGeometry = new THREE.BoxGeometry(0.2, 0.1, roomLength - 1);
   const frontTrack = new THREE.Mesh(crossTrackGeometry, trackMaterial);
-  frontTrack.position.set(0, roomHeight - 0.15, 0);
+  frontTrack.position.set(0, roomHeight / 2 - 0.15, 0); // Corrected Y position
   scene.add(frontTrack);
 
   // Add track connectors at intersections
@@ -67,56 +76,70 @@ function createRoom() {
   });
   const connector = new THREE.Mesh(connectorGeometry, connectorMaterial);
   connector.rotation.x = Math.PI / 2;
-  connector.position.set(0, roomHeight - 0.15, 0);
+  connector.position.set(0, roomHeight / 2 - 0.15, 0); // Corrected Y position
   scene.add(connector);
 
-  // Add ceiling track lights for each artwork position
-  const artworkPositions = [
-    // Left wall artwork
-    { pos: [-roomWidth / 2 + 0.05, roomHeight - 0.2, roomLength / 3], rot: new THREE.Euler(0, Math.PI / 2, 0) },
-    // Right wall artwork
-    { pos: [roomWidth / 2 - 0.05, roomHeight - 0.2, -roomLength / 3], rot: new THREE.Euler(0, -Math.PI / 2, 0) },
-    // Back wall artwork
-    { pos: [0, roomHeight - 0.2, -roomLength / 2 + 0.05], rot: new THREE.Euler(0, 0, 0) },
-    // Front wall artwork
-    { pos: [0, roomHeight - 0.2, roomLength / 2 - 0.05], rot: new THREE.Euler(0, Math.PI, 0) }
+  // Define positions for the spotlights relative to the center, near the ceiling
+  const lightPositions = [
+    // Near Left wall artwork
+    { x: -roomWidth / 2 + 1.5, z: roomLength / 3 },
+    // Near Right wall artwork
+    { x: roomWidth / 2 - 1.5, z: -roomLength / 3 },
+    // Near Back wall artwork
+    { x: 0, z: -roomLength / 2 + 1.5 },
+    // Near Front wall artwork
+    { x: 0, z: roomLength / 2 - 1.5 }
+    // Add more positions here if needed for extra lights
   ];
 
-  artworkPositions.forEach(({ pos, rot }) => {
-    // Create spotlight housing (black cylinder)
+  // Get artwork positions for targeting spotlights
+  const artworkTargetPositions = [
+      { pos: [-roomWidth / 2 + 0.05, 2.5, roomLength / 3], rot: new THREE.Euler(0, Math.PI / 2, 0) }, // Left
+      { pos: [roomWidth / 2 - 0.05, 2.5, -roomLength / 3], rot: new THREE.Euler(0, -Math.PI / 2, 0) }, // Right
+      { pos: [0, 2.5, -roomLength / 2 + 0.05], rot: new THREE.Euler(0, 0, 0) }, // Back
+      { pos: [0, 2.5, roomLength / 2 - 0.05], rot: new THREE.Euler(0, Math.PI, 0) } // Front
+  ];
+
+
+  lightPositions.forEach((lightPos, index) => {
+    const lightY = roomHeight / 2 - 0.2; // Corrected Y position for lights/housings
+    // Create spotlight housing (white cylinder)
     const housingGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.3, 16);
-    const housingMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0x000000,
-      metalness: 0.7,
-      roughness: 0.3
+    const housingMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff, // White
+      metalness: 0.5,
+      roughness: 0.5
     });
     const housing = new THREE.Mesh(housingGeometry, housingMaterial);
-    housing.position.set(pos[0], pos[1], pos[2]);
+    housing.position.set(lightPos.x, lightY, lightPos.z); // Use corrected Y and lightPos
     housing.rotation.x = Math.PI / 2; // Point cylinder downward
     scene.add(housing);
 
     // Create spotlight
     const spotLight = new THREE.SpotLight(0xffffff, 3.5); // Increased intensity
-    spotLight.position.set(pos[0], pos[1], pos[2]);
-    
-    // Calculate target position based on artwork position and rotation
-    const targetOffset = new THREE.Vector3(0, -1.5, 0); // Adjusted target distance
-    targetOffset.applyEuler(rot);
-    
-    const target = new THREE.Object3D();
-    target.position.set(
-      pos[0] + targetOffset.x,
-      pos[1] + targetOffset.y,
-      pos[2] + targetOffset.z
-    );
-    scene.add(target);
-    spotLight.target = target;
+    spotLight.position.set(lightPos.x, lightY, lightPos.z); // Use corrected Y and lightPos
 
-    // Configure spotlight for dramatic lighting
-    spotLight.angle = Math.PI / 16;      // Even narrower beam
-    spotLight.penumbra = 0.1;            // Sharper edges
-    spotLight.decay = 1.0;               // Less decay for stronger light
-    spotLight.distance = 6;              // Shorter distance for more intensity
+    // Target the corresponding artwork (ensure arrays match length or handle index)
+    if (index < artworkTargetPositions.length) {
+        const artTargetPos = artworkTargetPositions[index].pos;
+        const target = new THREE.Object3D();
+        target.position.set(artTargetPos[0], artTargetPos[1], artTargetPos[2]); // Target the artwork's position
+        scene.add(target);
+        spotLight.target = target;
+    } else {
+        // Default target if no corresponding artwork (e.g., point downwards)
+        const target = new THREE.Object3D();
+        target.position.set(lightPos.x, 0, lightPos.z); // Point towards floor below light
+        scene.add(target);
+        spotLight.target = target;
+    }
+
+
+    // Configure spotlight for softer, wider museum lighting
+    spotLight.angle = Math.PI / 8;       // Wider beam
+    spotLight.penumbra = 0.3;            // Softer edges
+    spotLight.decay = 1.5;               // Adjusted decay
+    spotLight.distance = 8;              // Adjusted distance
     spotLight.castShadow = true;
     spotLight.power = 40;                // Increased power for more dramatic effect
 
@@ -136,7 +159,7 @@ function addArtwork(artworkManager) {
   const artworkData = [
     {
       imagePath: '/assets/images/FaceDisguise.png',
-      position: new THREE.Vector3(-roomWidth / 2 + 0.05, 2.5, roomLength / 3),
+      position: new THREE.Vector3(-roomWidth / 2 + 0.05, 3.0, roomLength / 3), // Raised Y position
       rotation: new THREE.Euler(0, Math.PI / 2, 0),
       metadata: {
         title: 'Face Disguise',
@@ -150,7 +173,7 @@ function addArtwork(artworkManager) {
     },
     {
       imagePath: '/assets/images/ManWoman.png',
-      position: new THREE.Vector3(roomWidth / 2 - 0.05, 2.5, -roomLength / 3),
+      position: new THREE.Vector3(roomWidth / 2 - 0.05, 3.0, -roomLength / 3), // Raised Y position
       rotation: new THREE.Euler(0, -Math.PI / 2, 0),
       metadata: {
         title: 'Man Woman',
@@ -164,7 +187,7 @@ function addArtwork(artworkManager) {
     },
     {
       imagePath: '/assets/images/VeinsOfTheCosmos.png',
-      position: new THREE.Vector3(0, 2.5, -roomLength / 2 + 0.05),
+      position: new THREE.Vector3(0, 3.0, -roomLength / 2 + 0.05), // Raised Y position
       rotation: new THREE.Euler(0, 0, 0),
       metadata: {
         title: 'Veins of the Cosmos',
@@ -178,7 +201,7 @@ function addArtwork(artworkManager) {
     },
     {
       imagePath: '/assets/images/ThreeSisters.png',
-      position: new THREE.Vector3(0, 2.5, roomLength / 2 - 0.05),
+      position: new THREE.Vector3(0, 3.0, roomLength / 2 - 0.05), // Raised Y position
       rotation: new THREE.Euler(0, Math.PI, 0),
       metadata: {
         title: 'Three Sisters',
@@ -192,7 +215,7 @@ function addArtwork(artworkManager) {
     },
     {
       imagePath: '/assets/images/image.png',
-      position: new THREE.Vector3(0, roomHeight / 4, 0),
+      position: new THREE.Vector3(0, 3.5, 0), // Raised Y position
       rotation: new THREE.Euler(0, 0, 0),
       metadata: {
         title: 'Center Image',

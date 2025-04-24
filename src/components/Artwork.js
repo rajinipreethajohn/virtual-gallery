@@ -102,9 +102,9 @@ export class ArtworkManager {
         
         // Add frame if requested
         if (metadata.frame) {
-          this.addFrame(artwork, width, height, metadata.frameColor || 0x8b4513);
+          this.addFrame(artwork, width, height); // Removed color parameter
         }
-        
+
         // Add specific lighting for this artwork if requested
         if (metadata.spotlight) {
           this.addSpotlight(artwork, position, metadata.spotlightColor || 0xffffff);
@@ -114,35 +114,59 @@ export class ArtworkManager {
       });
     });
   }
-  
-  // Add a decorative frame around artwork
-  addFrame(artworkMesh, width, height, color) {
-    const frameWidth = 0.1; // Width of the frame border
-    
-    // Create outer frame
-    const outerGeometry = new THREE.PlaneGeometry(
-      width + frameWidth * 2,
-      height + frameWidth * 2
-    );
+
+  // Add a decorative thick black frame around artwork
+  addFrame(artworkMesh, width, height) { // Removed color parameter
+    const frameWidth = 0.2; // Thickness of the frame border sides
+    const frameDepth = 0.05; // Depth of the frame
+
     const frameMaterial = new THREE.MeshStandardMaterial({
-      color: color,
-      roughness: 0.7,
-      metalness: 0.3
+      color: 0x000000, // Black color
+      roughness: 0.6,
+      metalness: 0.2
     });
-    
-    const frame = new THREE.Mesh(outerGeometry, frameMaterial);
-    frame.position.copy(artworkMesh.position);
-    frame.rotation.copy(artworkMesh.rotation);
-    
-    // Move frame slightly behind artwork to avoid z-fighting
-    const offset = new THREE.Vector3(0, 0, -0.01);
-    offset.applyEuler(artworkMesh.rotation);
-    frame.position.add(offset);
-    
-    this.scene.add(frame);
-    return frame;
+
+    // Create frame pieces (top, bottom, left, right)
+    const geometries = {
+      top: new THREE.BoxGeometry(width + 2 * frameWidth, frameWidth, frameDepth),
+      bottom: new THREE.BoxGeometry(width + 2 * frameWidth, frameWidth, frameDepth),
+      left: new THREE.BoxGeometry(frameWidth, height, frameDepth),
+      right: new THREE.BoxGeometry(frameWidth, height, frameDepth)
+    };
+
+    const framePieces = {};
+    const offsets = {
+        top: new THREE.Vector3(0, height / 2 + frameWidth / 2, 0),
+        bottom: new THREE.Vector3(0, -height / 2 - frameWidth / 2, 0),
+        left: new THREE.Vector3(-width / 2 - frameWidth / 2, 0, 0),
+        right: new THREE.Vector3(width / 2 + frameWidth / 2, 0, 0)
+    };
+
+    // Create and position each frame piece relative to the artwork
+    for (const side in geometries) {
+        const piece = new THREE.Mesh(geometries[side], frameMaterial);
+
+        // Apply artwork's rotation to the offset vector
+        const rotatedOffset = offsets[side].clone().applyEuler(artworkMesh.rotation);
+
+        // Position the piece relative to the artwork center + offset
+        piece.position.copy(artworkMesh.position).add(rotatedOffset);
+
+        // Apply artwork's rotation to the piece itself
+        piece.rotation.copy(artworkMesh.rotation);
+
+        // Move frame slightly behind artwork plane to avoid z-fighting
+        const depthOffset = new THREE.Vector3(0, 0, -0.01);
+        depthOffset.applyEuler(artworkMesh.rotation);
+        piece.position.add(depthOffset);
+
+
+        this.scene.add(piece);
+        framePieces[side] = piece;
+    }
+    // No return needed as pieces are added directly to the scene
   }
-  
+
   // Add a spotlight focused on the artwork
   addSpotlight(artworkMesh, position, color) {
     const spotLight = new THREE.SpotLight(color, 2.5); // Increased intensity
