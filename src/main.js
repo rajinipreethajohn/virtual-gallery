@@ -6,11 +6,67 @@ import { controls, velocity, direction, moveForward, moveBackward, moveLeft, mov
 import { setupAudio } from './components/AudioPlayer.js';
 import { ArtworkManager } from './components/Artwork.js';
 
+// Mobile detection
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+
+const isMobile = isMobileDevice();
+
+// Set pixel ratio for mobile
+if (isMobile) {
+  renderer.setPixelRatio(window.devicePixelRatio / 2); // Reduce pixel ratio
+}
+
 document.body.appendChild(renderer.domElement);
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+function handleTouchStart(event) {
+  touchStartX = event.touches[0].clientX;
+  touchStartY = event.touches[0].clientY;
+}
+
+function handleTouchMove(event) {
+  if (!touchStartX || !touchStartY) {
+    return;
+  }
+
+  let touchEndX = event.touches[0].clientX;
+  let touchEndY = event.touches[0].clientY;
+
+  let dx = touchEndX - touchStartX;
+  let dy = touchEndY - touchStartY;
+
+  // Adjust camera rotation based on touch movement
+  camera.rotation.y += dx * 0.005;
+  camera.rotation.x += dy * 0.005;
+
+  touchStartX = touchEndX;
+  touchStartY = touchEndY;
+}
+
+function handleTouchEnd() {
+  touchStartX = 0;
+  touchStartY = 0;
+}
 
 // Initialize components
 const artworkManager = new ArtworkManager(scene, camera);
 const clock = new THREE.Clock();
+
+// Disable pointer lock on mobile
+if (isMobile) {
+  document.body.removeEventListener('click', () => {
+    controls.lock();
+  });
+
+  document.body.addEventListener('touchstart', handleTouchStart);
+  document.body.addEventListener('touchmove', handleTouchMove);
+  document.body.addEventListener('touchend', handleTouchEnd);
+}
 
 // Room dimensions (shared between Gallery.js and boundary checks)
 const roomLength = 20;
@@ -79,7 +135,7 @@ function init() {
     <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
                 background: rgba(0,0,0,0.5); color: white; padding: 10px; border-radius: 5px; 
                 font-family: Arial, sans-serif; text-align: center;">
-      <p>Click to start | Move: W,A,S,D or Arrow Keys | Look: Mouse | Approach artwork for details</p>
+      <p>${isMobile ? 'Move: Touch & Drag | Approach artwork for details' : 'Click to start | Move: W,A,S,D or Arrow Keys | Look: Mouse | Approach artwork for details'}</p>
     </div>
   `;
   document.body.appendChild(instructions);

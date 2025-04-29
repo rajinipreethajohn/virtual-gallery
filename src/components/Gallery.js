@@ -28,9 +28,9 @@ function createRoom() {
 
   // Floor with texture
   const floorTexture = textureLoader.load('/assets/textures/medieval_wood.jpg');
-  floorTexture.wrapS = THREE.RepeatWrapping; // Repeat horizontally
-  floorTexture.wrapT = THREE.RepeatWrapping; // Repeat vertically
-  floorTexture.repeat.set(4, 4); // How many times to repeat the texture
+  floorTexture.wrapS = THREE.RepeatWrapping;
+  floorTexture.wrapT = THREE.RepeatWrapping;
+  floorTexture.repeat.set(2, 2); // Reduced repeat
 
   const floorGeometry = new THREE.PlaneGeometry(roomWidth, roomLength);
   const floorMaterial = new THREE.MeshStandardMaterial({
@@ -141,15 +141,15 @@ function createRoom() {
     spotLight.decay = 1.5;               // Adjusted decay
     spotLight.distance = 8;              // Adjusted distance
     spotLight.castShadow = true;
-    spotLight.power = 40;                // Increased power for more dramatic effect
+    spotLight.power = 40;
 
-    // High-quality shadows
-    spotLight.shadow.mapSize.width = 2048;
-    spotLight.shadow.mapSize.height = 2048;
+    // Adjusted shadow settings for mobile
+    spotLight.shadow.mapSize.width = 512;  // Reduced shadow map size
+    spotLight.shadow.mapSize.height = 512; // Reduced shadow map size
     spotLight.shadow.camera.near = 0.1;
     spotLight.shadow.camera.far = 10;
     spotLight.shadow.focus = 1;
-    spotLight.shadow.bias = -0.0001;     // Reduce shadow artifacts
+    spotLight.shadow.bias = -0.0001;
 
     scene.add(spotLight);
   });
