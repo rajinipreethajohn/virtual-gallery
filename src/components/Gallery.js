@@ -1,8 +1,10 @@
 import * as THREE from 'three';
-import { scene } from '../utils/three-setup.js';
+import { scene, loadingManager } from '../utils/three-setup.js';
+
 
 // Texture Loader
-const textureLoader = new THREE.TextureLoader();
+const textureLoader = new THREE.TextureLoader(loadingManager);
+
 
 // Room dimensions
 const roomWidth = 20;
