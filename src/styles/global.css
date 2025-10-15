@@ -59,6 +59,43 @@ canvas {
   .audio-controls .volume-slider {
     width: 80px;
   }
+
+  /* replace your current .artist-signature block with this */
+.artist-signature {
+  display: block;
+  margin: 10px auto 0;
+  width: 160px;
+  opacity: 1;
+  pointer-events: none;
+  position: relative;
+  filter: none !important;
+  -webkit-filter: none !important;
+  mix-blend-mode: normal;
+}
+
+/* white overlay using pseudo-element */
+.artist-signature {
+  position: relative;
+  display: block;
+  margin: 10px auto 0;
+  width: 160px;
+  opacity: 1;
+  filter: grayscale(100%) brightness(3) contrast(300%);
+  -webkit-filter: grayscale(100%) brightness(3) contrast(300%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation: fadeInSignature 2s ease forwards;
+}
+
+@keyframes fadeInSignature {
+  from { opacity: 0; transform: translateY(10px) rotate(-2deg); }
+  to { opacity: 1; transform: translateY(0) rotate(-2deg); }
+}
+
+
+
+
+
   
   /* Room transition effect */
   .room-transition {
@@ -313,10 +350,12 @@ canvas {
   border-radius: 6px;
 }
 
-/* Mobile view adjustments */
+/* 🌟 Responsive centering fix for heading & signature */
+
+/* Mobile view adjustments (<=768px) */
 @media (max-width: 768px) {
   .hint {
-    bottom: 10%;  /* move up */
+    bottom: 10%;
     left: 50%;
     transform: translateX(-50%);
     font-size: 0.8rem;
@@ -329,11 +368,44 @@ canvas {
     transform: translateX(-50%);
   }
 
-  /* Optional: Hide one of the redundant movement hints */
+  /* Hide redundant movement hints */
   .move-instructions {
     display: none;
+  }
+
+  #loading-screen h1 {
+    margin-top: 0;
+  }
+
+}
+
+/* Desktop refinement (>=769px) */
+@media (min-width: 769px) {
+  #loading-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 22vh; /* moves the heading down slightly */
+  }
+
+  #loading-screen h1 {
+    margin-top: 0;
+  }
+
+
+  /* ✅ Hide control instructions on desktop */
+  #controls-help,
+  #instructions {
+    display: none !important;
+  }
+
+@supports (-webkit-touch-callout: none) {
+  .artist-signature {
+    -webkit-filter: brightness(0) saturate(100%) invert(1);
+    mix-blend-mode: screen;
   }
 }
 
 
-      
+}

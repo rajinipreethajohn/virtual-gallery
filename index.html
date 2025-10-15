@@ -7,8 +7,12 @@
 
   <!-- Elegant artistic fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/global.css">
 
-  <style>
+
+  
+</head>
+<style>
   body {
     margin: 0;
     overflow: hidden;
@@ -25,6 +29,7 @@
     100% { background-position: 0% 50%; }
   }
 
+  /* ✅ Keep dark background visible, no white overlay */
   #loading-screen {
     position: absolute;
     top: 0;
@@ -36,8 +41,9 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.4); /* transparent dark tint */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     text-align: center;
   }
 
@@ -64,8 +70,24 @@
     animation: fadeIn 2s ease forwards 1.2s;
   }
 
+  .artist-signature {
+    display: block;
+    margin: 12px auto 0;
+    width: 180px;
+    opacity: 0.9;
+    pointer-events: none;
+    transform: rotate(-2deg);
+    filter: brightness(1.6) sepia(1) hue-rotate(10deg) saturate(5)
+            drop-shadow(0 0 6px rgba(255,215,0,0.6));
+    animation: fadeInSignature 2.5s ease forwards;
+  }
+
+  @keyframes fadeInSignature {
+    from { opacity: 0; transform: translateY(10px) rotate(-2deg); }
+    to { opacity: 0.9; transform: translateY(0) rotate(-2deg); }
+  }
+
   p {
-    font-family: 'Nunito Sans', sans-serif;
     font-size: 1rem;
     opacity: 0;
     color: #ddd;
@@ -124,36 +146,15 @@
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
-  #controls-help {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: rgba(255,255,255,0.05);
-    color: #eee;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-  }
-
-  #artwork-info {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: rgba(0,0,0,0.7);
-    color: white;
-    padding: 15px;
-    border-radius: 5px;
-    max-width: 300px;
-    display: none;
-  }
-  </style>
-</head>
+</style>
 
 <body>
   <div id="loading-screen">
     <h1>The Virtual Art Gallery</h1>
+    <img src="./assets/images/signature.png"
+     alt="Rajini Preetha John Signature"
+     class="artist-signature">
+
     <p>Immerse yourself in a world of light, space, and imagination.</p>
     <div id="loading-bar">
       <div id="loading-progress"></div>

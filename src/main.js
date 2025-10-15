@@ -20,6 +20,24 @@ if (isMobile) {
 }
 
 document.body.appendChild(renderer.domElement);
+// ✨ Show signature after entering the gallery
+const startButton = document.getElementById('start-button');
+if (startButton) {
+  startButton.addEventListener('click', () => {
+    setTimeout(() => {
+      signature.style.opacity = '1';
+    }, 2000); // fade in 2s after entry
+  });
+}
+
+
+// 🖋️ Add your signature overlay
+const signature = document.createElement('img');
+signature.src = '/public/assets/images/signature.png';
+signature.alt = 'Rajini Preetha John Signature';
+signature.className = 'artist-signature';
+document.body.appendChild(signature);
+
 // ✅ Prevent pull-to-refresh / overscroll on mobile browsers
 if (isMobile) {
   document.body.style.overscrollBehavior = 'none';
