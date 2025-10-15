@@ -384,15 +384,21 @@ canvas {
   #loading-screen {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: center;  /* ✅ perfect vertical centering */
     align-items: center;
-    padding-top: 22vh; /* moves the heading down slightly */
+    padding-top: 0;           /* ⛔ remove extra top padding */
+    height: 100vh;            /* ensure full screen centering */
   }
 
   #loading-screen h1 {
     margin-top: 0;
+    font-size: 3rem;
   }
 
+  .artist-signature {
+    width: 200px;
+    margin-top: 1rem;
+  }
 
   /* ✅ Hide control instructions on desktop */
   #controls-help,
@@ -400,12 +406,43 @@ canvas {
     display: none !important;
   }
 
-@supports (-webkit-touch-callout: none) {
+  @supports (-webkit-touch-callout: none) {
   .artist-signature {
-    -webkit-filter: brightness(0) saturate(100%) invert(1);
     mix-blend-mode: screen;
+    filter: brightness(0) saturate(100%) invert(1);
+    -webkit-filter: brightness(0) saturate(100%) invert(1); /* ✅ vendor comes last */
   }
 }
 
 
 }
+
+.joystick-control {
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+}
+
+
+/* 🎮 Joystick glow effect */
+.joystick-control {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.joystick-control:active {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.8); /* gold glow */
+  transform: scale(1.05);
+}
+
+
+  /* 🚫 Prevent blue highlight or text selection on touch */
+* {
+  -webkit-tap-highlight-color: transparent; /* removes blue overlay */
+  -webkit-user-select: none; /* disables long-press text selection */
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+button, div, img, canvas {
+  -webkit-touch-callout: none; /* disable callout on long press */
+}
+

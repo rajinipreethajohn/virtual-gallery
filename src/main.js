@@ -2,9 +2,47 @@ import * as THREE from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import { scene, camera, renderer } from './utils/three-setup.js';
 import { createRoom, addArtwork } from './components/Gallery.js';
-import { controls, velocity, direction, moveForward, moveBackward, moveLeft, moveRight } from './components/Controls.js';
+import {
+  controls,
+  velocity,
+  direction,
+  moveForward,
+  moveBackward,
+  moveLeft,
+  moveRight,
+  clampCameraRotation,   // ⬅️ add this new import
+} from './components/Controls.js';
 import { setupAudio } from './components/AudioPlayer.js';
 import { ArtworkManager } from './components/Artwork.js';
+
+// 🧭 Set initial spawn reference — unified for desktop & mobile
+function setupSpawnReference(scene, camera, isMobile) {
+  // Set consistent camera position and direction
+  camera.position.set(0, 1.6, 5);
+  camera.lookAt(0, 1.5, 0); // face toward the main wall
+
+  // Sync pointer lock controls with camera (for desktop)
+  controls.getObject().position.copy(camera.position);
+  controls.getObject().rotation.copy(camera.rotation);
+
+  if (isMobile) {
+    // Optional: subtle floor marker for mobile orientation
+    const loader = new THREE.TextureLoader();
+    const markerTex = loader.load('./assets/images/start_marker.png'); // placeholder texture
+    const markerGeo = new THREE.CircleGeometry(0.4, 32);
+    const markerMat = new THREE.MeshBasicMaterial({
+      map: markerTex,
+      transparent: true,
+      opacity: 0.6,
+    });
+    const marker = new THREE.Mesh(markerGeo, markerMat);
+    marker.rotation.x = -Math.PI / 2;
+    marker.position.set(0, 0.01, 0);
+    scene.add(marker);
+  }
+}
+
+
 
 // Mobile detection
 function isMobileDevice() {
@@ -105,7 +143,10 @@ if (isMobile) {
   document.body.addEventListener('touchend', handleTouchEnd);
 
   // Add a simple virtual joystick
+  
   const joystick = document.createElement('div');
+  joystick.className = 'joystick-control';
+
   joystick.style.position = 'absolute';
   joystick.style.bottom = '100px';
   joystick.style.left = '40px';
@@ -150,9 +191,21 @@ if (isMobile) {
     const delta = clock.getDelta();
 
     if (joystickActive) {
-      camera.position.x -= moveX * delta * 5;
-      camera.position.z -= moveY * delta * 5;
-    }
+  const moveSpeed = 5 * delta;
+
+  // Move relative to the camera's facing direction (natural control)
+  const forward = new THREE.Vector3();
+  camera.getWorldDirection(forward);
+  forward.y = 0; // prevent vertical drift
+  forward.normalize();
+
+  const right = new THREE.Vector3();
+  right.crossVectors(camera.up, forward).normalize();
+
+  // Use joystick input to move in facing direction
+  camera.position.addScaledVector(forward, -moveY * moveSpeed);
+  camera.position.addScaledVector(right, moveX * moveSpeed);
+}
 
     // Clamp camera inside room
     const margin = 0.5;
@@ -160,6 +213,9 @@ if (isMobile) {
     const roomLength = 20;
     camera.position.x = Math.min(Math.max(camera.position.x, -roomWidth/2 + margin), roomWidth/2 - margin);
     camera.position.z = Math.min(Math.max(camera.position.z, -roomLength/2 + margin), roomLength/2 - margin);
+
+    // ✅ Prevent over-tilting on mobile too
+    clampCameraRotation();
 
     artworkManager.update();
     renderer.render(scene, camera);
@@ -202,6 +258,9 @@ function animate() {
     if (camera.position.z < -roomLength/2 + margin) camera.position.z = -roomLength/2 + margin;
     if (camera.position.z > roomLength/2 - margin) camera.position.z = roomLength/2 - margin;
   }
+
+  // ✅ Clamp camera pitch so it can’t spin to the ceiling/floor
+  clampCameraRotation();
   
   // Update artwork proximity detection
   artworkManager.update();
@@ -222,11 +281,17 @@ function init() {
   createRoom();
   addArtwork(artworkManager);
 
+   // 🧭 Set initial camera spawn orientation (fixed view)
+  setupSpawnReference(scene, camera, isMobile);
+
+
+
+
   // Setup audio (adds its own start button)
   setupAudio();
 
-  // Initial camera position
-  camera.position.set(0, 1.6, roomLength / 3);
+ 
+
 
   // Add instructions dynamically
   const instructions = document.createElement('div');
@@ -275,6 +340,8 @@ function init() {
 
   // Start the render loop
   animate();
+  clampCameraRotation();
+
 }
 
 
