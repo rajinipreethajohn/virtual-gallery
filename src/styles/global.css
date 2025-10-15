@@ -245,8 +245,8 @@ canvas {
   cursor: pointer;
   transition: all 0.4s ease;
   animation: fadeInUp 2s ease forwards;
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px); /* ✅ Safari Fix */
+  backdrop-filter: blur(12px);
   z-index: 2;
 }
 
