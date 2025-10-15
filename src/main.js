@@ -20,6 +20,23 @@ if (isMobile) {
 }
 
 document.body.appendChild(renderer.domElement);
+// ✅ Prevent pull-to-refresh / overscroll on mobile browsers
+if (isMobile) {
+  document.body.style.overscrollBehavior = 'none';
+  document.documentElement.style.overscrollBehavior = 'none';
+  document.body.style.touchAction = 'none';
+
+  // Prevent the downward swipe from triggering a refresh
+  window.addEventListener(
+    'touchmove',
+    (event) => {
+      // Allow pinch zoom but block one-finger drags
+      if (event.touches.length > 1 || (event.scale && event.scale !== 1)) return;
+      event.preventDefault();
+    },
+    { passive: false }
+  );
+}
 
 let touchStartX = 0;
 let touchStartY = 0;
@@ -58,15 +75,79 @@ const artworkManager = new ArtworkManager(scene, camera);
 const clock = new THREE.Clock();
 
 // Disable pointer lock on mobile
+// Mobile controls (touch look + movement)
 if (isMobile) {
   document.body.removeEventListener('click', () => {
     controls.lock();
   });
 
+  // Look controls (already defined)
   document.body.addEventListener('touchstart', handleTouchStart);
   document.body.addEventListener('touchmove', handleTouchMove);
   document.body.addEventListener('touchend', handleTouchEnd);
+
+  // Add a simple virtual joystick
+  const joystick = document.createElement('div');
+  joystick.style.position = 'absolute';
+  joystick.style.bottom = '100px';
+  joystick.style.left = '40px';
+  joystick.style.width = '100px';
+  joystick.style.height = '100px';
+  joystick.style.borderRadius = '50%';
+  joystick.style.background = 'rgba(255,255,255,0.1)';
+  joystick.style.border = '2px solid rgba(255,255,255,0.3)';
+  joystick.style.touchAction = 'none';
+  joystick.style.zIndex = '999';
+  document.body.appendChild(joystick);
+
+  let joystickActive = false;
+  let moveX = 0, moveY = 0;
+
+  joystick.addEventListener('touchstart', (e) => {
+    joystickActive = true;
+    const touch = e.touches[0];
+    joystick.dataset.startX = touch.clientX;
+    joystick.dataset.startY = touch.clientY;
+  });
+
+  joystick.addEventListener('touchmove', (e) => {
+    if (!joystickActive) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - joystick.dataset.startX;
+    const dy = touch.clientY - joystick.dataset.startY;
+    moveX = Math.max(-1, Math.min(1, dx / 40));
+    moveY = Math.max(-1, Math.min(1, dy / 40));
+  });
+
+  joystick.addEventListener('touchend', () => {
+    joystickActive = false;
+    moveX = 0;
+    moveY = 0;
+  });
+
+  // Override animate() movement for mobile
+  const originalAnimate = animate;
+  animate = function mobileAnimate() {
+    requestAnimationFrame(mobileAnimate);
+    const delta = clock.getDelta();
+
+    if (joystickActive) {
+      camera.position.x -= moveX * delta * 5;
+      camera.position.z -= moveY * delta * 5;
+    }
+
+    // Clamp camera inside room
+    const margin = 0.5;
+    const roomWidth = 20;
+    const roomLength = 20;
+    camera.position.x = Math.min(Math.max(camera.position.x, -roomWidth/2 + margin), roomWidth/2 - margin);
+    camera.position.z = Math.min(Math.max(camera.position.z, -roomLength/2 + margin), roomLength/2 - margin);
+
+    artworkManager.update();
+    renderer.render(scene, camera);
+  };
 }
+
 
 // Room dimensions (shared between Gallery.js and boundary checks)
 const roomLength = 20;
@@ -122,27 +203,73 @@ function init() {
   // Create the room and add artwork
   createRoom();
   addArtwork(artworkManager);
-  
-  // Setup audio (this adds its own start button)
+
+  // Setup audio (adds its own start button)
   setupAudio();
-  
+
   // Initial camera position
-  camera.position.set(0, 1.6, roomLength/3); // Start position in the room
-  
-  // Add instructions
+  camera.position.set(0, 1.6, roomLength / 3);
+
+  // Add instructions dynamically
   const instructions = document.createElement('div');
-  instructions.innerHTML = `
-    <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
-                background: rgba(0,0,0,0.5); color: white; padding: 10px; border-radius: 5px; 
-                font-family: Arial, sans-serif; text-align: center;">
-      <p>${isMobile ? 'Move: Touch & Drag | Approach artwork for details' : 'Click to start | Move: W,A,S,D or Arrow Keys | Look: Mouse | Approach artwork for details'}</p>
-    </div>
-  `;
+  instructions.id = 'instructions';
+  instructions.style.position = 'absolute';
+  instructions.style.left = '50%';
+  instructions.style.transform = 'translateX(-50%)';
+  instructions.style.background = 'rgba(0, 0, 0, 0.5)';
+  instructions.style.color = 'white';
+  instructions.style.padding = '10px 14px';
+  instructions.style.borderRadius = '8px';
+  instructions.style.fontFamily = 'Arial, sans-serif';
+  instructions.style.textAlign = 'center';
+  instructions.style.zIndex = '1000';
+
+  if (isMobile) {
+    // 📱 Mobile-friendly positioning
+    instructions.style.bottom = '120px'; // Higher up to avoid joystick & audio button overlap
+    instructions.style.width = '80%';
+    instructions.style.fontSize = '14px';
+    instructions.innerHTML = `
+      <p style="margin:0;">Touch & Drag to look around</p>
+      <p style="margin:0;">Use joystick below to move</p>
+      <p style="margin:0;">Approach artwork for details</p>
+    `;
+  } else {
+    // 🖥️ Desktop instructions
+    instructions.style.bottom = '20px';
+    instructions.innerHTML = `
+      <p style="margin:0;">Click to start</p>
+      <p style="margin:0;">Move: W,A,S,D or Arrow Keys | Look: Mouse</p>
+      <p style="margin:0;">Approach artwork for details</p>
+    `;
+  }
+
   document.body.appendChild(instructions);
-  
+
+  // 🧩 Optional: fade out instructions after a few seconds on mobile
+  if (isMobile) {
+    setTimeout(() => {
+      instructions.style.transition = 'opacity 1.5s';
+      instructions.style.opacity = '0';
+      setTimeout(() => instructions.remove(), 2000);
+    }, 6000); // disappears after 6 seconds
+  }
+
   // Start the render loop
   animate();
 }
 
+
 // Start the application
 init();
+// 🖱️ Remove bottom instruction overlay after entering (desktop)
+if (!isMobile) {
+  controls.addEventListener('lock', () => {
+    const instructions = document.getElementById('instructions');
+    if (instructions) {
+      instructions.style.transition = 'opacity 1.5s';
+      instructions.style.opacity = '0';
+      setTimeout(() => instructions.remove(), 1500);
+    }
+  });
+}
