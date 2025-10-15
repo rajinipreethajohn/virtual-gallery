@@ -68,8 +68,8 @@ canvas {
   opacity: 1;
   pointer-events: none;
   position: relative;
-  filter: none !important;
   -webkit-filter: none !important;
+  filter: none !important;
   mix-blend-mode: normal;
 }
 
@@ -80,8 +80,8 @@ canvas {
   margin: 10px auto 0;
   width: 160px;
   opacity: 1;
-  filter: grayscale(100%) brightness(3) contrast(300%);
   -webkit-filter: grayscale(100%) brightness(3) contrast(300%);
+  filter: grayscale(100%) brightness(3) contrast(300%);
   pointer-events: none;
   mix-blend-mode: screen;
   animation: fadeInSignature 2s ease forwards;
@@ -409,8 +409,8 @@ canvas {
   @supports (-webkit-touch-callout: none) {
   .artist-signature {
     mix-blend-mode: screen;
-    filter: brightness(0) saturate(100%) invert(1);
     -webkit-filter: brightness(0) saturate(100%) invert(1); /* ✅ vendor comes last */
+    filter: brightness(0) saturate(100%) invert(1);
   }
 }
 
