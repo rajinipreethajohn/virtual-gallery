@@ -1,201 +1,344 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Art Gallery</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Art Gallery</title>
 
-  <!-- Elegant artistic fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="src/styles/global.css">
+    <!-- Elegant artistic fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Nunito+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="src/styles/global.css" />
+  </head>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: "Nunito Sans", sans-serif;
+      background: linear-gradient(-45deg, #0b0b0b, #101010, #141414, #0f0f0f);
+      background-size: 400% 400%;
+      animation: gradientShift 28s ease infinite;
+      color: #f5f5f5;
+    }
 
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
 
-  
-</head>
-<style>
-  body {
-    margin: 0;
-    overflow: hidden;
-    font-family: 'Nunito Sans', sans-serif;
-    background: linear-gradient(-45deg, #0a0a0a, #111, #151515, #0d0d0d);
-    background-size: 400% 400%;
-    animation: gradientShift 14s ease infinite;
-    color: #f5f5f5;
-  }
+    /* ✅ Keep dark background visible, no white overlay */
+    #loading-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.4); /* transparent dark tint */
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      text-align: center;
+      overflow: hidden;
+    }
 
-  @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+    h1 {
+      position: relative;
+      z-index: 1;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 2.8rem;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: #f5f5f5;
+      opacity: 0;
+      animation: fadeIn 2s ease forwards 0.5s;
+    }
 
-  /* ✅ Keep dark background visible, no white overlay */
-  #loading-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.4); /* transparent dark tint */
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    text-align: center;
-  }
+    h1::after {
+      content: "";
+      display: block;
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, #d4af37, #f5e7c6);
+      margin: 12px auto;
+      border-radius: 2px;
+      opacity: 0;
+      animation: fadeIn 2s ease forwards 1.2s;
+    }
 
-  h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.8rem;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    font-weight: 500;
-    color: #f5f5f5;
-    opacity: 0;
-    animation: fadeIn 2s ease forwards 0.5s;
-  }
+    .artist-signature {
+      position: relative;
+      z-index: 1;
+      display: block;
+      margin: 12px auto 0;
+      width: 180px;
+      opacity: 0.9;
+      pointer-events: none;
+      transform: rotate(-2deg);
+      filter: brightness(1.6) sepia(1) hue-rotate(10deg) saturate(5)
+        drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+      animation: fadeInSignature 2.5s ease forwards;
+    }
 
-  h1::after {
-    content: "";
-    display: block;
-    width: 80px;
-    height: 2px;
-    background: linear-gradient(90deg, #d4af37, #f5e7c6);
-    margin: 12px auto;
-    border-radius: 2px;
-    opacity: 0;
-    animation: fadeIn 2s ease forwards 1.2s;
-  }
+    @keyframes fadeInSignature {
+      from {
+        opacity: 0;
+        transform: translateY(10px) rotate(-2deg);
+      }
+      to {
+        opacity: 0.9;
+        transform: translateY(0) rotate(-2deg);
+      }
+    }
 
-  .artist-signature {
-    display: block;
-    margin: 12px auto 0;
-    width: 180px;
-    opacity: 0.9;
-    pointer-events: none;
-    transform: rotate(-2deg);
-    filter: brightness(1.6) sepia(1) hue-rotate(10deg) saturate(5)
-            drop-shadow(0 0 6px rgba(255,215,0,0.6));
-    animation: fadeInSignature 2.5s ease forwards;
-  }
+    p {
+      position: relative;
+      z-index: 1;
+      font-size: 1rem;
+      opacity: 0;
+      color: #ddd;
+      animation: fadeIn 2.5s ease forwards 1.8s;
+    }
 
-  @keyframes fadeInSignature {
-    from { opacity: 0; transform: translateY(10px) rotate(-2deg); }
-    to { opacity: 0.9; transform: translateY(0) rotate(-2deg); }
-  }
+    #rotating-line {
+      position: relative;
+      z-index: 1;
+      margin-top: 10px;
+      min-height: 28px;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      letter-spacing: 0.4px;
+      color: rgba(255, 255, 255, 0.82);
+      opacity: 0;
+      animation: fadeIn 2.5s ease forwards 2s;
+      transition: opacity 0.8s ease;
+    }
 
-  p {
-    font-size: 1rem;
-    opacity: 0;
-    color: #ddd;
-    animation: fadeIn 2.5s ease forwards 1.8s;
-  }
+    #gallery-footer {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      font-size: 0.72rem;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.38);
+      font-family: "Nunito Sans", sans-serif;
+      text-align: center;
+      white-space: nowrap;
+    }
 
-  #loading-bar {
-    width: 280px;
-    height: 8px;
-    background-color: rgba(255, 255, 255, 0.15);
-    margin-top: 24px;
-    border-radius: 5px;
-    overflow: hidden;
-    opacity: 0;
-    animation: fadeIn 2.5s ease forwards 2.2s;
-  }
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.1rem;
+        line-height: 1.1;
+        padding: 0 20px;
+      }
 
-  #loading-progress {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #f1e7b6, #d4af37, #f1e7b6);
-    background-size: 200% 200%;
-    animation: shimmer 3s linear infinite;
-  }
+      .artist-signature {
+        width: 140px;
+      }
 
-  @keyframes shimmer {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
-  }
+      p {
+        padding: 0 28px;
+        font-size: 0.95rem;
+      }
 
-  #start-button {
-    margin-top: 35px;
-    padding: 12px 32px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #f5f5f5;
-    border-radius: 40px;
-    font-family: 'Nunito Sans', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 1px;
-    cursor: pointer;
-    opacity: 0;
-    animation: fadeIn 3s ease forwards 2.8s;
-    transition: all 0.4s ease;
-  }
+      #rotating-line {
+        padding: 0 30px;
+        font-size: 1rem;
+      }
 
-  #start-button:hover {
-    background: rgba(255, 255, 255, 0.8);
-    color: #000;
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-  }
+      #loading-bar {
+        width: 220px;
+      }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-</style>
+      #start-button {
+        margin-top: 28px;
+        padding: 11px 26px;
+      }
 
-<body>
-  <div id="loading-screen">
-    <h1>The Virtual Art Gallery</h1>
-    <img src="./assets/images/signature.png"
-     alt="Rajini Preetha John Signature"
-     class="artist-signature">
+      #gallery-footer {
+        bottom: 42px;
+        font-size: 0.62rem;
+        letter-spacing: 1.2px;
+      }
 
-    <p>Immerse yourself in a world of light, space, and imagination.</p>
-    <div id="loading-bar">
-      <div id="loading-progress"></div>
+      #controls-help {
+        bottom: 16px;
+        top: auto;
+        right: 50%;
+        transform: translateX(50%);
+        width: calc(100% - 36px);
+        max-width: 320px;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        text-align: center;
+      }
+    }
+
+    #loading-bar {
+      position: relative;
+      z-index: 1;
+      width: 280px;
+      height: 8px;
+      background-color: rgba(255, 255, 255, 0.15);
+      margin-top: 24px;
+      border-radius: 5px;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeIn 2.5s ease forwards 2.2s;
+    }
+
+    #loading-progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f1e7b6, #d4af37, #f1e7b6);
+      background-size: 200% 200%;
+      animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 0% 50%;
+      }
+      100% {
+        background-position: 200% 50%;
+      }
+    }
+
+    #start-button {
+      position: relative;
+      z-index: 1;
+      margin-top: 35px;
+      padding: 12px 32px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #f5f5f5;
+      border-radius: 40px;
+      font-family: "Nunito Sans", sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      opacity: 0;
+      animation: fadeIn 3s ease forwards 2.8s;
+      transition: all 0.4s ease;
+    }
+
+    #start-button:hover {
+      background: rgba(255, 255, 255, 0.8);
+      color: #000;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+
+  <body>
+    <div id="loading-screen">
+      <h1>The Virtual Art Gallery</h1>
+      <img
+        src="./assets/images/signature.png"
+        alt="Rajini Preetha John Signature"
+        class="artist-signature"
+      />
+
+      <p>Immerse yourself in a world of light, space, and imagination.</p>
+
+      <div id="rotating-line">Where silence becomes color.</div>
+
+      <div id="loading-bar">
+        <div id="loading-progress"></div>
+      </div>
+      <button id="start-button">Enter Experience</button>
+
+      <div id="gallery-footer">RPJ Digital Collection • 2026</div>
     </div>
-    <button id="start-button">Enter Experience</button>
-  </div>
 
-  <div id="controls-help">
-    Move: W,A,S,D or Arrows | Look: Mouse | Click to begin
-  </div>
+    <div id="controls-help">
+      Move: W,A,S,D or Arrows | Look: Mouse | Click to begin
+    </div>
 
-  <div id="artwork-info">
-    <h3 id="artwork-title">Artwork Title</h3>
-    <p id="artwork-description">Description of the artwork will appear here when you approach a piece.</p>
-  </div>
+    <div id="artwork-info">
+      <h3 id="artwork-title">Artwork Title</h3>
+      <p id="artwork-description">
+        Description of the artwork will appear here when you approach a piece.
+      </p>
+    </div>
 
-  <script type="module" src="src/main.js"></script>
-  <script>
-    // Simulate loading
-    window.addEventListener('DOMContentLoaded', () => {
-      const progressBar = document.getElementById('loading-progress');
-      const startButton = document.getElementById('start-button');
-      const loadingScreen = document.getElementById('loading-screen');
-      
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 10;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-          startButton.style.display = 'block';
-        }
-        progressBar.style.width = `${progress}%`;
-      }, 200);
-      
-      startButton.addEventListener('click', () => {
-        loadingScreen.style.transition = "opacity 1s ease";
-        loadingScreen.style.opacity = 0;
-        setTimeout(() => loadingScreen.remove(), 1000);
+    <script type="module" src="src/main.js"></script>
+    <script>
+      // Simulate loading
+      window.addEventListener("DOMContentLoaded", () => {
+        const progressBar = document.getElementById("loading-progress");
+        const startButton = document.getElementById("start-button");
+        const loadingScreen = document.getElementById("loading-screen");
+
+        const rotatingLine = document.getElementById("rotating-line");
+
+        const poeticLines = [
+          "Where silence becomes color.",
+          "A quiet room for digital dreams.",
+          "Wander slowly. Let the work find you.",
+          "Art, atmosphere, and memory in motion.",
+          "Step inside a world of light and stillness.",
+        ];
+
+        let currentLine = 0;
+
+        setInterval(() => {
+          rotatingLine.style.opacity = 0;
+
+          setTimeout(() => {
+            currentLine = (currentLine + 1) % poeticLines.length;
+            rotatingLine.textContent = poeticLines[currentLine];
+            rotatingLine.style.opacity = 1;
+          }, 700);
+        }, 5000);
+
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            startButton.style.display = "block";
+          }
+          progressBar.style.width = `${progress}%`;
+        }, 200);
+
+        startButton.addEventListener("click", () => {
+          loadingScreen.style.transition = "opacity 1s ease";
+          loadingScreen.style.opacity = 0;
+          setTimeout(() => loadingScreen.remove(), 1000);
+        });
       });
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
