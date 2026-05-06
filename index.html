@@ -143,28 +143,73 @@
       white-space: nowrap;
     }
 
-    #controls-help {
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      position: fixed !important;
-      left: 50% !important;
-      bottom: 28px !important;
-      transform: translateX(-50%) !important;
-      z-index: 9999 !important;
-      padding: 14px 22px;
-      min-width: 260px;
-      background: rgba(0, 0, 0, 0.58);
-      color: rgba(255, 255, 255, 0.9);
-      border-radius: 10px;
+    #controls-toggle {
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      z-index: 10000;
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      background: rgba(0, 0, 0, 0.46);
+      color: rgba(255, 255, 255, 0.92);
       font-family: "Nunito Sans", sans-serif;
-      font-size: 0.95rem;
-      line-height: 1.35;
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1;
       text-align: center;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      cursor: pointer;
+      pointer-events: auto;
+      user-select: none;
+      -webkit-user-select: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        opacity 0.25s ease;
+    }
+
+    #controls-toggle:hover {
+      transform: scale(1.06);
+      background: rgba(0, 0, 0, 0.62);
+    }
+
+    #controls-help {
+      position: fixed;
+      top: 78px;
+      right: 22px;
+      z-index: 9999;
+      padding: 14px 18px;
+      min-width: 245px;
+      max-width: 280px;
+      background: rgba(0, 0, 0, 0.62);
+      color: rgba(255, 255, 255, 0.92);
+      border-radius: 14px;
+      font-family: "Nunito Sans", sans-serif;
+      font-size: 0.92rem;
+      line-height: 1.42;
+      text-align: left;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32);
       pointer-events: none;
+      opacity: 0;
+      transform: translateY(-8px);
+      visibility: hidden;
+      transition:
+        opacity 0.28s ease,
+        transform 0.28s ease,
+        visibility 0.28s ease;
+    }
+
+    #controls-help.is-open {
+      display: block !important;
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
     }
 
     @media (max-width: 768px) {
@@ -203,18 +248,31 @@
         letter-spacing: 1.2px;
       }
 
+      #controls-toggle {
+        top: 18px;
+        right: 18px;
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+      }
+
       #controls-help {
-        bottom: 16px !important;
-        top: auto !important;
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-        width: calc(100% - 36px);
-        max-width: 320px;
+        top: 72px;
+        right: 18px;
+        bottom: auto;
+        left: auto;
+        transform: translateY(-8px);
+        width: min(280px, calc(100% - 36px));
+        max-width: 280px;
         min-width: 0;
-        font-size: 0.9rem;
-        line-height: 1.4;
-        text-align: center;
+        font-size: 0.88rem;
+        line-height: 1.42;
+        text-align: left;
+      }
+
+      #controls-help.is-open {
+        display: block !important;
+        transform: translateY(0);
       }
     }
 
@@ -307,7 +365,14 @@
       <div id="gallery-footer">RPJ Digital Collection • 2026</div>
     </div>
 
-    <div id="controls-help" data-rpj-controls-help="true"></div>
+    <button id="controls-toggle" type="button" aria-label="Show controls">
+      i
+    </button>
+    <div
+      id="controls-help"
+      data-rpj-controls-help="true"
+      aria-hidden="true"
+    ></div>
 
     <div id="artwork-info">
       <h3 id="artwork-title">Artwork Title</h3>
@@ -326,6 +391,7 @@
 
         const rotatingLine = document.getElementById("rotating-line");
         const controlsHelp = document.getElementById("controls-help");
+        const controlsToggle = document.getElementById("controls-toggle");
 
         const isMobile =
           /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
@@ -349,6 +415,50 @@
             Press ESC to exit movement
           `;
         }
+
+        let controlsHelpTimer;
+
+        function openControlsHelp() {
+          controlsHelp.classList.add("is-open");
+          controlsHelp.setAttribute("aria-hidden", "false");
+          controlsToggle.setAttribute("aria-label", "Hide controls");
+          clearTimeout(controlsHelpTimer);
+          controlsHelpTimer = setTimeout(closeControlsHelp, 5000);
+        }
+
+        function closeControlsHelp() {
+          controlsHelp.classList.remove("is-open");
+          controlsHelp.setAttribute("aria-hidden", "true");
+          controlsToggle.setAttribute("aria-label", "Show controls");
+          clearTimeout(controlsHelpTimer);
+        }
+
+        function toggleControlsHelp(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation?.();
+
+          if (controlsHelp.classList.contains("is-open")) {
+            closeControlsHelp();
+          } else {
+            openControlsHelp();
+          }
+        }
+
+        function blockControlsClick(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation?.();
+        }
+
+        controlsToggle.addEventListener(
+          "pointerdown",
+          toggleControlsHelp,
+          true,
+        );
+        controlsToggle.addEventListener("mousedown", blockControlsClick, true);
+        controlsToggle.addEventListener("click", blockControlsClick, true);
+        controlsToggle.addEventListener("touchend", blockControlsClick, true);
 
         const poeticLines = [
           "Where silence becomes color.",

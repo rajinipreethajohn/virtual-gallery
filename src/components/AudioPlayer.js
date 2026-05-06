@@ -74,7 +74,7 @@ function createMuteButton(sound) {
   Object.assign(muteButton.style, {
     position: "fixed",
     top: "24px",
-    right: "20px",
+    left: "20px",
     padding: "12px 18px",
     border: "none",
     borderRadius: "999px",
