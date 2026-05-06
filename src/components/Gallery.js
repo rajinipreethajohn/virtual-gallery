@@ -1,10 +1,8 @@
-import * as THREE from 'three';
-import { scene, loadingManager } from '../utils/three-setup.js';
-
+import * as THREE from "three";
+import { scene, loadingManager } from "../utils/three-setup.js";
 
 // Texture Loader
 const textureLoader = new THREE.TextureLoader(loadingManager);
-
 
 // Room dimensions
 const roomWidth = 20;
@@ -19,17 +17,17 @@ function createRoom() {
   // Walls
   const roomGeometry = new THREE.BoxGeometry(roomWidth, roomHeight, roomLength);
   const roomMaterial = new THREE.MeshStandardMaterial({
-    color: 0xffffff,  // Bright white walls
+    color: 0xffffff, // Bright white walls
     side: THREE.BackSide,
-    roughness: 0.8,   // Slightly less rough for a bit more light bounce
-    metalness: 0.1
+    roughness: 0.8, // Slightly less rough for a bit more light bounce
+    metalness: 0.1,
   });
   const room = new THREE.Mesh(roomGeometry, roomMaterial);
   room.receiveShadow = true;
   scene.add(room);
 
   // Floor with texture
-  const floorTexture = textureLoader.load('/assets/textures/medieval_wood.jpg');
+  const floorTexture = textureLoader.load("/assets/textures/medieval_wood.jpg");
   floorTexture.wrapS = THREE.RepeatWrapping;
   floorTexture.wrapT = THREE.RepeatWrapping;
   floorTexture.repeat.set(2, 2); // Reduced repeat
@@ -38,7 +36,7 @@ function createRoom() {
   const floorMaterial = new THREE.MeshStandardMaterial({
     map: floorTexture,
     roughness: 0.7,
-    metalness: 0.1
+    metalness: 0.1,
   });
   const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   floor.rotation.x = -Math.PI / 2;
@@ -54,12 +52,19 @@ function createRoom() {
   const trackMaterial = new THREE.MeshStandardMaterial({
     color: 0xcccccc, // Light gray
     metalness: 0.6,
-    roughness: 0.4
+    roughness: 0.4,
   });
 
   // Main horizontal track
-  const horizontalTrackGeometry = new THREE.BoxGeometry(roomWidth - 1, 0.1, 0.2);
-  const horizontalTrack = new THREE.Mesh(horizontalTrackGeometry, trackMaterial);
+  const horizontalTrackGeometry = new THREE.BoxGeometry(
+    roomWidth - 1,
+    0.1,
+    0.2,
+  );
+  const horizontalTrack = new THREE.Mesh(
+    horizontalTrackGeometry,
+    trackMaterial,
+  );
   horizontalTrack.position.set(0, roomHeight / 2 - 0.15, 0); // Corrected Y position
   scene.add(horizontalTrack);
 
@@ -74,7 +79,7 @@ function createRoom() {
   const connectorMaterial = new THREE.MeshStandardMaterial({
     color: 0x303030,
     metalness: 0.9,
-    roughness: 0.1
+    roughness: 0.1,
   });
   const connector = new THREE.Mesh(connectorGeometry, connectorMaterial);
   connector.rotation.x = Math.PI / 2;
@@ -90,18 +95,26 @@ function createRoom() {
     // Near Back wall artwork
     { x: 0, z: -roomLength / 2 + 1.5 },
     // Near Front wall artwork
-    { x: 0, z: roomLength / 2 - 1.5 }
+    { x: 0, z: roomLength / 2 - 1.5 },
     // Add more positions here if needed for extra lights
   ];
 
   // Get artwork positions for targeting spotlights
   const artworkTargetPositions = [
-      { pos: [-roomWidth / 2 + 0.05, 2.5, roomLength / 3], rot: new THREE.Euler(0, Math.PI / 2, 0) }, // Left
-      { pos: [roomWidth / 2 - 0.05, 2.5, -roomLength / 3], rot: new THREE.Euler(0, -Math.PI / 2, 0) }, // Right
-      { pos: [0, 2.5, -roomLength / 2 + 0.05], rot: new THREE.Euler(0, 0, 0) }, // Back
-      { pos: [0, 2.5, roomLength / 2 - 0.05], rot: new THREE.Euler(0, Math.PI, 0) } // Front
+    {
+      pos: [-roomWidth / 2 + 0.05, 2.5, roomLength / 3],
+      rot: new THREE.Euler(0, Math.PI / 2, 0),
+    }, // Left
+    {
+      pos: [roomWidth / 2 - 0.05, 2.5, -roomLength / 3],
+      rot: new THREE.Euler(0, -Math.PI / 2, 0),
+    }, // Right
+    { pos: [0, 2.5, -roomLength / 2 + 0.05], rot: new THREE.Euler(0, 0, 0) }, // Back
+    {
+      pos: [0, 2.5, roomLength / 2 - 0.05],
+      rot: new THREE.Euler(0, Math.PI, 0),
+    }, // Front
   ];
-
 
   lightPositions.forEach((lightPos, index) => {
     const lightY = roomHeight / 2 - 0.2; // Corrected Y position for lights/housings
@@ -110,7 +123,7 @@ function createRoom() {
     const housingMaterial = new THREE.MeshStandardMaterial({
       color: 0xffffff, // White
       metalness: 0.5,
-      roughness: 0.5
+      roughness: 0.5,
     });
     const housing = new THREE.Mesh(housingGeometry, housingMaterial);
     housing.position.set(lightPos.x, lightY, lightPos.z); // Use corrected Y and lightPos
@@ -123,30 +136,29 @@ function createRoom() {
 
     // Target the corresponding artwork (ensure arrays match length or handle index)
     if (index < artworkTargetPositions.length) {
-        const artTargetPos = artworkTargetPositions[index].pos;
-        const target = new THREE.Object3D();
-        target.position.set(artTargetPos[0], artTargetPos[1], artTargetPos[2]); // Target the artwork's position
-        scene.add(target);
-        spotLight.target = target;
+      const artTargetPos = artworkTargetPositions[index].pos;
+      const target = new THREE.Object3D();
+      target.position.set(artTargetPos[0], artTargetPos[1], artTargetPos[2]); // Target the artwork's position
+      scene.add(target);
+      spotLight.target = target;
     } else {
-        // Default target if no corresponding artwork (e.g., point downwards)
-        const target = new THREE.Object3D();
-        target.position.set(lightPos.x, 0, lightPos.z); // Point towards floor below light
-        scene.add(target);
-        spotLight.target = target;
+      // Default target if no corresponding artwork (e.g., point downwards)
+      const target = new THREE.Object3D();
+      target.position.set(lightPos.x, 0, lightPos.z); // Point towards floor below light
+      scene.add(target);
+      spotLight.target = target;
     }
 
-
     // Configure spotlight for softer, wider museum lighting
-    spotLight.angle = Math.PI / 8;       // Wider beam
-    spotLight.penumbra = 0.3;            // Softer edges
-    spotLight.decay = 1.5;               // Adjusted decay
-    spotLight.distance = 8;              // Adjusted distance
+    spotLight.angle = Math.PI / 8; // Wider beam
+    spotLight.penumbra = 0.3; // Softer edges
+    spotLight.decay = 1.5; // Adjusted decay
+    spotLight.distance = 8; // Adjusted distance
     spotLight.castShadow = true;
     spotLight.power = 40;
 
     // Adjusted shadow settings for mobile
-    spotLight.shadow.mapSize.width = 512;  // Reduced shadow map size
+    spotLight.shadow.mapSize.width = 512; // Reduced shadow map size
     spotLight.shadow.mapSize.height = 512; // Reduced shadow map size
     spotLight.shadow.camera.near = 0.1;
     spotLight.shadow.camera.far = 10;
@@ -160,84 +172,84 @@ function createRoom() {
 function addArtwork(artworkManager) {
   const artworkData = [
     {
-      imagePath: '/assets/images/FaceDisguise.png',
+      imagePath: "/assets/images/FaceDisguise.png",
       position: new THREE.Vector3(-roomWidth / 2 + 0.05, 3.0, roomLength / 3), // Raised Y position
       rotation: new THREE.Euler(0, Math.PI / 2, 0),
       metadata: {
-        title: 'Face Disguise',
-        artist: 'Unknown',
-        description: 'A mysterious face.',
-        year: 'Unknown',
+        title: "Face Disguise",
+        artist: "Unknown",
+        description: "A mysterious face.",
+        year: "Unknown",
         spotlight: true,
         spotlightColor: 0xffffff,
-        frame: true
-      }
+        frame: true,
+      },
     },
     {
-      imagePath: '/assets/images/ManWoman.png',
+      imagePath: "/assets/images/ManWoman.png",
       position: new THREE.Vector3(roomWidth / 2 - 0.05, 3.0, -roomLength / 3), // Raised Y position
       rotation: new THREE.Euler(0, -Math.PI / 2, 0),
       metadata: {
-        title: 'Man Woman',
-        artist: 'Unknown',
-        description: 'A depiction of duality.',
-        year: 'Unknown',
+        title: "Man Woman",
+        artist: "Unknown",
+        description: "A depiction of duality.",
+        year: "Unknown",
         spotlight: true,
         spotlightColor: 0xffffff,
-        frame: true
-      }
+        frame: true,
+      },
     },
     {
-      imagePath: '/assets/images/VeinsOfTheCosmos.png',
+      imagePath: "/assets/images/VeinsOfTheCosmos.png",
       position: new THREE.Vector3(0, 3.0, -roomLength / 2 + 0.05), // Raised Y position
       rotation: new THREE.Euler(0, 0, 0),
       metadata: {
-        title: 'Veins of the Cosmos',
-        artist: 'Unknown',
-        description: 'Cosmic connections.',
-        year: 'Unknown',
+        title: "Veins of the Cosmos",
+        artist: "Unknown",
+        description: "Cosmic connections.",
+        year: "Unknown",
         spotlight: true,
         spotlightColor: 0xffffff,
-        frame: true
-      }
+        frame: true,
+      },
     },
     {
-      imagePath: '/assets/images/ThreeSisters.png',
+      imagePath: "/assets/images/ThreeSisters.png",
       position: new THREE.Vector3(0, 3.0, roomLength / 2 - 0.05), // Raised Y position
       rotation: new THREE.Euler(0, Math.PI, 0),
       metadata: {
-        title: 'Three Sisters',
-        artist: 'Unknown',
-        description: 'A bond of sisterhood.',
-        year: 'Unknown',
+        title: "Three Sisters",
+        artist: "Unknown",
+        description: "A bond of sisterhood.",
+        year: "Unknown",
         spotlight: true,
         spotlightColor: 0xffffff,
-        frame: true
-      }
+        frame: true,
+      },
     },
     {
-      imagePath: '/assets/images/image.png',
+      imagePath: "/assets/images/ShivParvati.jpg",
       position: new THREE.Vector3(0, 3.5, 0), // Raised Y position
       rotation: new THREE.Euler(0, 0, 0),
       metadata: {
-        title: 'Center Image',
-        artist: 'Unknown',
-        description: 'A central piece.',
-        year: 'Unknown',
+        title: "Center Image",
+        artist: "Unknown",
+        description: "A central piece.",
+        year: "Unknown",
         spotlight: true,
         spotlightColor: 0xffffff,
-        frame: true
-      }
-    }
+        frame: true,
+      },
+    },
   ];
 
-  artworkData.forEach(data => {
+  artworkData.forEach((data) => {
     artworkManager.loadArtwork(
       data.imagePath,
       data.position,
       data.rotation,
       new THREE.Vector3(artWidth, artHeight, 1), // Scale
-      data.metadata
+      data.metadata,
     );
   });
 }
