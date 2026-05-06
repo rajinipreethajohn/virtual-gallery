@@ -143,6 +143,30 @@
       white-space: nowrap;
     }
 
+    #controls-help {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      position: fixed !important;
+      left: 50% !important;
+      bottom: 28px !important;
+      transform: translateX(-50%) !important;
+      z-index: 9999 !important;
+      padding: 14px 22px;
+      min-width: 260px;
+      background: rgba(0, 0, 0, 0.58);
+      color: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      font-family: "Nunito Sans", sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.35;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      pointer-events: none;
+    }
+
     @media (max-width: 768px) {
       h1 {
         font-size: 2.1rem;
@@ -180,12 +204,14 @@
       }
 
       #controls-help {
-        bottom: 16px;
-        top: auto;
-        right: 50%;
-        transform: translateX(50%);
+        bottom: 16px !important;
+        top: auto !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
         width: calc(100% - 36px);
         max-width: 320px;
+        min-width: 0;
         font-size: 0.9rem;
         line-height: 1.4;
         text-align: center;
@@ -281,9 +307,7 @@
       <div id="gallery-footer">RPJ Digital Collection • 2026</div>
     </div>
 
-    <div id="controls-help">
-      Move: W,A,S,D or Arrows | Look: Mouse | Click to begin
-    </div>
+    <div id="controls-help" data-rpj-controls-help="true"></div>
 
     <div id="artwork-info">
       <h3 id="artwork-title">Artwork Title</h3>
@@ -301,6 +325,30 @@
         const loadingScreen = document.getElementById("loading-screen");
 
         const rotatingLine = document.getElementById("rotating-line");
+        const controlsHelp = document.getElementById("controls-help");
+
+        const isMobile =
+          /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
+            navigator.userAgent,
+          ) ||
+          navigator.maxTouchPoints > 0 ||
+          window.matchMedia("(pointer: coarse)").matches;
+
+        if (isMobile) {
+          controlsHelp.innerHTML = `
+            Touch & Drag to look around<br>
+            Use glowing orb to move<br>
+            Approach artwork for details<br>
+            Release finger to stop
+          `;
+        } else {
+          controlsHelp.innerHTML = `
+            Click to start<br>
+            Move: W, A, S, D or Arrow Keys<br>
+            Look: Mouse<br>
+            Press ESC to exit movement
+          `;
+        }
 
         const poeticLines = [
           "Where silence becomes color.",

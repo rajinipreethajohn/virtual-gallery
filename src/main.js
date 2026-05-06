@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
-import { scene, camera, renderer } from './utils/three-setup.js';
-import { createRoom, addArtwork } from './components/Gallery.js';
+import * as THREE from "three";
+import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls.js";
+import { scene, camera, renderer } from "./utils/three-setup.js";
+import { createRoom, addArtwork } from "./components/Gallery.js";
 import {
   controls,
   velocity,
@@ -10,10 +10,10 @@ import {
   moveBackward,
   moveLeft,
   moveRight,
-  clampCameraRotation,   // ⬅️ add this new import
-} from './components/Controls.js';
-import { setupAudio } from './components/AudioPlayer.js';
-import { ArtworkManager } from './components/Artwork.js';
+  clampCameraRotation, // ⬅️ add this new import
+} from "./components/Controls.js";
+import { setupAudio } from "./components/AudioPlayer.js";
+import { ArtworkManager } from "./components/Artwork.js";
 
 // 🧭 Set initial spawn reference — unified for desktop & mobile
 function setupSpawnReference(scene, camera, isMobile) {
@@ -28,7 +28,7 @@ function setupSpawnReference(scene, camera, isMobile) {
   if (isMobile) {
     // Optional: subtle floor marker for mobile orientation
     const loader = new THREE.TextureLoader();
-    const markerTex = loader.load('./assets/images/start_marker.png'); // placeholder texture
+    const markerTex = loader.load("./assets/images/start_marker.png"); // placeholder texture
     const markerGeo = new THREE.CircleGeometry(0.4, 32);
     const markerMat = new THREE.MeshBasicMaterial({
       map: markerTex,
@@ -42,13 +42,12 @@ function setupSpawnReference(scene, camera, isMobile) {
   }
 }
 
-
-
 // Mobile detection
 function isMobileDevice() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent,
+  );
 }
-
 
 const isMobile = isMobileDevice();
 
@@ -59,38 +58,76 @@ if (isMobile) {
 
 document.body.appendChild(renderer.domElement);
 // ✨ Show signature after entering the gallery
-const startButton = document.getElementById('start-button');
+const startButton = document.getElementById("start-button");
+
+function unlockMobileAudio() {
+  const audioElements = document.querySelectorAll("audio");
+
+  audioElements.forEach((audio) => {
+    audio.muted = false;
+    audio.volume = audio.volume || 0.45;
+
+    if (audio.paused) {
+      audio.play().catch(() => {
+        // Mobile browsers may still block autoplay until another direct tap.
+      });
+    }
+  });
+
+  const audioContext =
+    THREE.AudioContext?.getContext?.() ||
+    THREE.AudioContext?.context ||
+    window.AudioContext ||
+    window.webkitAudioContext;
+
+  if (audioContext && audioContext.state === "suspended") {
+    audioContext.resume?.().catch?.(() => {});
+  }
+}
+
 if (startButton) {
-  startButton.addEventListener('click', () => {
+  startButton.addEventListener("click", () => {
+    unlockMobileAudio();
+
     setTimeout(() => {
-      signature.style.opacity = '1';
+      signature.style.opacity = "1";
     }, 2000); // fade in 2s after entry
+  });
+
+  startButton.addEventListener("touchstart", unlockMobileAudio, {
+    once: true,
+    passive: true,
+  });
+
+  startButton.addEventListener("touchend", unlockMobileAudio, {
+    once: true,
+    passive: true,
   });
 }
 
-
 // 🖋️ Add your signature overlay
-const signature = document.createElement('img');
-signature.src = '/public/assets/images/signature.png';
-signature.alt = 'Rajini Preetha John Signature';
-signature.className = 'artist-signature';
+const signature = document.createElement("img");
+signature.src = "/public/assets/images/signature.png";
+signature.alt = "Rajini Preetha John Signature";
+signature.className = "artist-signature";
 document.body.appendChild(signature);
 
 // ✅ Prevent pull-to-refresh / overscroll on mobile browsers
 if (isMobile) {
-  document.body.style.overscrollBehavior = 'none';
-  document.documentElement.style.overscrollBehavior = 'none';
-  document.body.style.touchAction = 'none';
+  document.body.style.overscrollBehavior = "none";
+  document.documentElement.style.overscrollBehavior = "none";
+  document.body.style.touchAction = "none";
 
   // Prevent the downward swipe from triggering a refresh
   window.addEventListener(
-    'touchmove',
+    "touchmove",
     (event) => {
       // Allow pinch zoom but block one-finger drags
-      if (event.touches.length > 1 || (event.scale && event.scale !== 1)) return;
+      if (event.touches.length > 1 || (event.scale && event.scale !== 1))
+        return;
       event.preventDefault();
     },
-    { passive: false }
+    { passive: false },
   );
 }
 
@@ -133,43 +170,44 @@ const clock = new THREE.Clock();
 // Disable pointer lock on mobile
 // Mobile controls (touch look + movement)
 if (isMobile) {
-  document.body.removeEventListener('click', () => {
+  document.body.removeEventListener("click", () => {
     controls.lock();
   });
 
   // Look controls (already defined)
-  document.body.addEventListener('touchstart', handleTouchStart);
-  document.body.addEventListener('touchmove', handleTouchMove);
-  document.body.addEventListener('touchend', handleTouchEnd);
+  document.body.addEventListener("touchstart", handleTouchStart);
+  document.body.addEventListener("touchmove", handleTouchMove);
+  document.body.addEventListener("touchend", handleTouchEnd);
 
   // Add a simple virtual joystick
-  
-  const joystick = document.createElement('div');
-  joystick.className = 'joystick-control';
 
-  joystick.style.position = 'absolute';
-  joystick.style.bottom = '100px';
-  joystick.style.left = '40px';
-  joystick.style.width = '100px';
-  joystick.style.height = '100px';
-  joystick.style.borderRadius = '50%';
-  joystick.style.background = 'rgba(255,255,255,0.1)';
-  joystick.style.border = '2px solid rgba(255,255,255,0.3)';
-  joystick.style.touchAction = 'none';
-  joystick.style.zIndex = '999';
+  const joystick = document.createElement("div");
+  joystick.className = "joystick-control";
+
+  joystick.style.position = "absolute";
+  joystick.style.bottom = "100px";
+  joystick.style.left = "40px";
+  joystick.style.width = "100px";
+  joystick.style.height = "100px";
+  joystick.style.borderRadius = "50%";
+  joystick.style.background = "rgba(255,255,255,0.1)";
+  joystick.style.border = "2px solid rgba(255,255,255,0.3)";
+  joystick.style.touchAction = "none";
+  joystick.style.zIndex = "999";
   document.body.appendChild(joystick);
 
   let joystickActive = false;
-  let moveX = 0, moveY = 0;
+  let moveX = 0,
+    moveY = 0;
 
-  joystick.addEventListener('touchstart', (e) => {
+  joystick.addEventListener("touchstart", (e) => {
     joystickActive = true;
     const touch = e.touches[0];
     joystick.dataset.startX = touch.clientX;
     joystick.dataset.startY = touch.clientY;
   });
 
-  joystick.addEventListener('touchmove', (e) => {
+  joystick.addEventListener("touchmove", (e) => {
     if (!joystickActive) return;
     const touch = e.touches[0];
     const dx = touch.clientX - joystick.dataset.startX;
@@ -178,7 +216,7 @@ if (isMobile) {
     moveY = Math.max(-1, Math.min(1, dy / 40));
   });
 
-  joystick.addEventListener('touchend', () => {
+  joystick.addEventListener("touchend", () => {
     joystickActive = false;
     moveX = 0;
     moveY = 0;
@@ -191,28 +229,34 @@ if (isMobile) {
     const delta = clock.getDelta();
 
     if (joystickActive) {
-  const moveSpeed = 5 * delta;
+      const moveSpeed = 5 * delta;
 
-  // Move relative to the camera's facing direction (natural control)
-  const forward = new THREE.Vector3();
-  camera.getWorldDirection(forward);
-  forward.y = 0; // prevent vertical drift
-  forward.normalize();
+      // Move relative to the camera's facing direction (natural control)
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      forward.y = 0; // prevent vertical drift
+      forward.normalize();
 
-  const right = new THREE.Vector3();
-  right.crossVectors(camera.up, forward).normalize();
+      const right = new THREE.Vector3();
+      right.crossVectors(camera.up, forward).normalize();
 
-  // Use joystick input to move in facing direction
-  camera.position.addScaledVector(forward, -moveY * moveSpeed);
-  camera.position.addScaledVector(right, moveX * moveSpeed);
-}
+      // Use joystick input to move in facing direction
+      camera.position.addScaledVector(forward, -moveY * moveSpeed);
+      camera.position.addScaledVector(right, moveX * moveSpeed);
+    }
 
     // Clamp camera inside room
     const margin = 0.5;
     const roomWidth = 20;
     const roomLength = 20;
-    camera.position.x = Math.min(Math.max(camera.position.x, -roomWidth/2 + margin), roomWidth/2 - margin);
-    camera.position.z = Math.min(Math.max(camera.position.z, -roomLength/2 + margin), roomLength/2 - margin);
+    camera.position.x = Math.min(
+      Math.max(camera.position.x, -roomWidth / 2 + margin),
+      roomWidth / 2 - margin,
+    );
+    camera.position.z = Math.min(
+      Math.max(camera.position.z, -roomLength / 2 + margin),
+      roomLength / 2 - margin,
+    );
 
     // ✅ Prevent over-tilting on mobile too
     clampCameraRotation();
@@ -222,54 +266,62 @@ if (isMobile) {
   };
 }
 
-
 // Room dimensions (shared between Gallery.js and boundary checks)
 const roomLength = 20;
 
 // Collision detection
-const raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
+const raycaster = new THREE.Raycaster(
+  new THREE.Vector3(),
+  new THREE.Vector3(0, -1, 0),
+  0,
+  10,
+);
 
 // Render loop
 function animate() {
   requestAnimationFrame(animate);
-  
+
   if (controls.isLocked) {
     const delta = clock.getDelta();
-    
+
     // Calculate movement
     velocity.x -= velocity.x * 10.0 * delta;
     velocity.z -= velocity.z * 10.0 * delta;
-    
+
     direction.z = Number(moveForward) - Number(moveBackward);
     direction.x = Number(moveRight) - Number(moveLeft);
     direction.normalize();
-    
+
     if (moveForward || moveBackward) velocity.z -= direction.z * 20.0 * delta;
     if (moveLeft || moveRight) velocity.x -= direction.x * 20.0 * delta;
-    
+
     controls.moveRight(-velocity.x * delta);
     controls.moveForward(-velocity.z * delta);
-    
+
     // Keep within room boundaries
     const margin = 0.5; // Distance from walls
     const roomWidth = 20;
-    if (camera.position.x < -roomWidth/2 + margin) camera.position.x = -roomWidth/2 + margin;
-    if (camera.position.x > roomWidth/2 - margin) camera.position.x = roomWidth/2 - margin;
-    if (camera.position.z < -roomLength/2 + margin) camera.position.z = -roomLength/2 + margin;
-    if (camera.position.z > roomLength/2 - margin) camera.position.z = roomLength/2 - margin;
+    if (camera.position.x < -roomWidth / 2 + margin)
+      camera.position.x = -roomWidth / 2 + margin;
+    if (camera.position.x > roomWidth / 2 - margin)
+      camera.position.x = roomWidth / 2 - margin;
+    if (camera.position.z < -roomLength / 2 + margin)
+      camera.position.z = -roomLength / 2 + margin;
+    if (camera.position.z > roomLength / 2 - margin)
+      camera.position.z = roomLength / 2 - margin;
   }
 
   // ✅ Clamp camera pitch so it can’t spin to the ceiling/floor
   clampCameraRotation();
-  
+
   // Update artwork proximity detection
   artworkManager.update();
-  
+
   renderer.render(scene, camera);
 }
 
 // Handle window resize
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -281,80 +333,34 @@ function init() {
   createRoom();
   addArtwork(artworkManager);
 
-   // 🧭 Set initial camera spawn orientation (fixed view)
+  // 🧭 Set initial camera spawn orientation (fixed view)
   setupSpawnReference(scene, camera, isMobile);
-
-
-
 
   // Setup audio (adds its own start button)
   setupAudio();
 
- 
-
-
-  // Add instructions dynamically
-  const instructions = document.createElement('div');
-  instructions.id = 'instructions';
-  instructions.style.position = 'absolute';
-  instructions.style.left = '50%';
-  instructions.style.transform = 'translateX(-50%)';
-  instructions.style.background = 'rgba(0, 0, 0, 0.5)';
-  instructions.style.color = 'white';
-  instructions.style.padding = '10px 14px';
-  instructions.style.borderRadius = '8px';
-  instructions.style.fontFamily = 'Arial, sans-serif';
-  instructions.style.textAlign = 'center';
-  instructions.style.zIndex = '1000';
-
   if (isMobile) {
-    // 📱 Mobile-friendly positioning
-    instructions.style.bottom = '120px'; // Higher up to avoid joystick & audio button overlap
-    instructions.style.width = '80%';
-    instructions.style.fontSize = '14px';
-    instructions.innerHTML = `
-      <p style="margin:0;">Touch & Drag to look around</p>
-      <p style="margin:0;">Use joystick below to move</p>
-      <p style="margin:0;">Approach artwork for details</p>
-    `;
-  } else {
-    // 🖥️ Desktop instructions
-    instructions.style.bottom = '20px';
-    instructions.innerHTML = `
-      <p style="margin:0;">Click to start</p>
-      <p style="margin:0;">Move: W,A,S,D or Arrow Keys | Look: Mouse</p>
-      <p style="margin:0;">Approach artwork for details</p>
-    `;
-  }
+    const unlockOnFirstTouch = () => {
+      unlockMobileAudio();
+      window.removeEventListener("touchstart", unlockOnFirstTouch);
+      window.removeEventListener("pointerdown", unlockOnFirstTouch);
+    };
 
-  document.body.appendChild(instructions);
+    window.addEventListener("touchstart", unlockOnFirstTouch, {
+      once: true,
+      passive: true,
+    });
 
-  // 🧩 Optional: fade out instructions after a few seconds on mobile
-  if (isMobile) {
-    setTimeout(() => {
-      instructions.style.transition = 'opacity 1.5s';
-      instructions.style.opacity = '0';
-      setTimeout(() => instructions.remove(), 2000);
-    }, 6000); // disappears after 6 seconds
+    window.addEventListener("pointerdown", unlockOnFirstTouch, {
+      once: true,
+      passive: true,
+    });
   }
 
   // Start the render loop
   animate();
   clampCameraRotation();
-
 }
-
 
 // Start the application
 init();
-// 🖱️ Remove bottom instruction overlay after entering (desktop)
-if (!isMobile) {
-  controls.addEventListener('lock', () => {
-    const instructions = document.getElementById('instructions');
-    if (instructions) {
-      instructions.style.transition = 'opacity 1.5s';
-      instructions.style.opacity = '0';
-      setTimeout(() => instructions.remove(), 1500);
-    }
-  });
-}
