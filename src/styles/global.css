@@ -429,9 +429,12 @@ canvas {
     transform: translateX(-50%);
   }
 
-  /* Hide mobile signature artifact box */
-  .artist-signature {
-    display: none !important;
+  /* Show only the intended loading-screen signature on mobile */
+  #loading-screen .artist-signature {
+    display: block !important;
+    width: 110px !important;
+    margin: 4px auto 12px !important;
+    opacity: 0.88 !important;
   }
 
   /* Hide redundant movement hints */
@@ -439,8 +442,42 @@ canvas {
     display: none;
   }
 
+  #loading-screen {
+    justify-content: flex-start;
+    padding-top: 82px;
+    box-sizing: border-box;
+  }
+
   #loading-screen h1 {
     margin-top: 0;
+    margin-bottom: 6px;
+    font-size: 2rem;
+    line-height: 1.05;
+  }
+
+  #loading-screen h1::after {
+    margin-top: 8px;
+  }
+
+  #loading-screen p {
+    font-size: 0.94rem;
+    line-height: 1.42;
+    margin: 6px 24px;
+  }
+
+  #rotating-line {
+    margin-top: 10px;
+    font-size: 1rem;
+  }
+
+  #loading-bar {
+    margin-top: 16px;
+    width: 240px;
+  }
+
+  #start-button,
+  #enter-gallery {
+    margin-top: 24px;
   }
 
   .info-panel {

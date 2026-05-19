@@ -87,11 +87,7 @@ function unlockMobileAudio() {
 
 if (startButton) {
   startButton.addEventListener("click", () => {
-    unlockMobileAudio();
-
-    setTimeout(() => {
-      signature.style.opacity = "1";
-    }, 2000); // fade in 2s after entry
+    unlockMobileAudio(); // fade in 2s after entry
   });
 
   startButton.addEventListener("touchstart", unlockMobileAudio, {
