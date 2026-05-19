@@ -214,14 +214,14 @@ function addArtwork(artworkManager) {
       },
     },
     {
-      imagePath: "/assets/images/ThreeSisters.png",
+      imagePath: "/assets/images/MirrorWoman.JPG",
       position: new THREE.Vector3(0, 3.0, roomLength / 2 - 0.05), // Raised Y position
       rotation: new THREE.Euler(0, Math.PI, 0),
       metadata: {
-        title: "Three Sisters",
-        artist: "Unknown",
-        description: "A bond of sisterhood.",
-        year: "Unknown",
+        title: "Reflected Fallacy",
+        artist: "RPJ",
+        description: "The mirror reflects a different story.",
+        year: "2024",
         spotlight: true,
         spotlightColor: 0xffffff,
         frame: true,
