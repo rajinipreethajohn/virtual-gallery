@@ -281,10 +281,10 @@ export class ArtworkManager {
 
   // Show artwork information panel
   showArtworkInfo(info) {
-    this.artworkTitle.textContent = `${info.title} (${info.year})`;
+    this.artworkTitle.style.display = "none";
 
     if (this.artworkArtist) {
-      this.artworkArtist.textContent = `By ${info.artist}`;
+      this.artworkArtist.style.display = "none";
       this.artworkDescription.textContent = info.description;
     } else {
       this.artworkDescription.innerHTML = `

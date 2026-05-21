@@ -172,70 +172,75 @@ function createRoom() {
 function addArtwork(artworkManager) {
   const artworkData = [
     {
-      imagePath: "/assets/images/FaceDisguise.png",
+      imagePath: "/assets/images/1.JPG",
       position: new THREE.Vector3(-roomWidth / 2 + 0.05, 3.0, roomLength / 3), // Raised Y position
       rotation: new THREE.Euler(0, Math.PI / 2, 0),
       metadata: {
-        title: "Face Disguise",
-        artist: "Unknown",
-        description: "A mysterious face.",
-        year: "Unknown",
+        title: "",
+        artist: "",
+        description:
+          "She gazes through the golden circle and finds a stranger wearing her own face — half shadow, half light, one eye open to what was, the other closed to what will never be.",
+        year: "",
         spotlight: true,
         spotlightColor: 0xffffff,
         frame: true,
       },
     },
     {
-      imagePath: "/assets/images/ManWoman.png",
+      imagePath: "/assets/images/2.JPG",
       position: new THREE.Vector3(roomWidth / 2 - 0.05, 3.0, -roomLength / 3), // Raised Y position
       rotation: new THREE.Euler(0, -Math.PI / 2, 0),
       metadata: {
-        title: "Man Woman",
-        artist: "Unknown",
-        description: "A depiction of duality.",
-        year: "Unknown",
+        title: "",
+        artist: "",
+        description:
+          "Between the gilded frame and the mosaic world behind her, she speaks without words to the one who knows all her secret names. The orbs in her hair are planets she has swallowed.",
+        year: "",
         spotlight: true,
         spotlightColor: 0xffffff,
         frame: true,
       },
     },
     {
-      imagePath: "/assets/images/VeinsOfTheCosmos.png",
+      imagePath: "/assets/images/5.JPG",
       position: new THREE.Vector3(0, 3.0, -roomLength / 2 + 0.05), // Raised Y position
       rotation: new THREE.Euler(0, 0, 0),
       metadata: {
-        title: "Veins of the Cosmos",
-        artist: "Unknown",
-        description: "Cosmic connections.",
-        year: "Unknown",
+        title: "",
+        artist: "",
+        description:
+          "From the deep spiral she was born. Her reflection unravels in golden waves, caught between the eye that sees and the abyss that watches back.",
+        year: "",
         spotlight: true,
         spotlightColor: 0xffffff,
         frame: true,
       },
     },
     {
-      imagePath: "/assets/images/MirrorWoman.JPG",
+      imagePath: "/assets/images/4.JPG",
       position: new THREE.Vector3(0, 3.0, roomLength / 2 - 0.05), // Raised Y position
       rotation: new THREE.Euler(0, Math.PI, 0),
       metadata: {
-        title: "Reflected Fallacy",
-        artist: "RPJ",
-        description: "The mirror reflects a different story.",
-        year: "2024",
+        title: "",
+        artist: "",
+        description:
+          "She carries a garden of remembered lives upon her head, yet the glass shows only silence — a face unwritten, a self not yet spoken into being.",
+        year: "",
         spotlight: true,
         spotlightColor: 0xffffff,
         frame: true,
       },
     },
     {
-      imagePath: "/assets/images/ShivParvati.jpg",
+      imagePath: "/assets/images/3.JPG",
       position: new THREE.Vector3(0, 3.5, 0), // Raised Y position
       rotation: new THREE.Euler(0, 0, 0),
       metadata: {
-        title: "Center Image",
-        artist: "Unknown",
-        description: "A central piece.",
-        year: "Unknown",
+        title: "",
+        artist: "",
+        description:
+          "Born of the same starlight, they meet at the edge of the world that splits all things in two — not mirror and woman, but dream and dreamer, eternal and indivisible.",
+        year: "",
         spotlight: true,
         spotlightColor: 0xffffff,
         frame: true,

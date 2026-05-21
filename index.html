@@ -113,6 +113,32 @@
       animation: fadeIn 2.5s ease forwards 1.8s;
     }
 
+    .exhibition-kicker {
+      position: relative;
+      z-index: 1;
+      margin: 18px 0 4px;
+      font-family: "Nunito Sans", sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.48);
+      opacity: 0;
+      animation: fadeIn 2.5s ease forwards 1.7s;
+    }
+
+    .exhibition-title {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-family: "Cormorant Garamond", serif;
+      font-size: 1.45rem;
+      font-style: italic;
+      letter-spacing: 0.6px;
+      color: rgba(245, 231, 198, 0.92);
+      opacity: 0;
+      animation: fadeIn 2.5s ease forwards 1.9s;
+    }
+
     #rotating-line {
       position: relative;
       z-index: 1;
@@ -226,6 +252,17 @@
       p {
         padding: 0 28px;
         font-size: 0.95rem;
+      }
+
+      .exhibition-kicker {
+        margin-top: 16px;
+        font-size: 0.64rem;
+        letter-spacing: 1.8px;
+      }
+
+      .exhibition-title {
+        padding: 0 24px;
+        font-size: 1.25rem;
       }
 
       #rotating-line {
@@ -353,7 +390,8 @@
         class="artist-signature"
       />
 
-      <p>Immerse yourself in a world of light, space, and imagination.</p>
+      <div class="exhibition-kicker">Current Exhibition</div>
+      <p class="exhibition-title">Fallacy &amp; Reflections — Summer 2026</p>
 
       <div id="rotating-line">Where silence becomes color.</div>
 
