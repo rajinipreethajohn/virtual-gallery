@@ -101,13 +101,6 @@ if (startButton) {
   });
 }
 
-// 🖋️ Add your signature overlay
-const signature = document.createElement("img");
-signature.src = "/public/assets/images/signature.png";
-signature.alt = "Rajini Preetha John Signature";
-signature.className = "artist-signature";
-document.body.appendChild(signature);
-
 // ✅ Prevent pull-to-refresh / overscroll on mobile browsers
 if (isMobile) {
   document.body.style.overscrollBehavior = "none";
