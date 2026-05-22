@@ -21,6 +21,11 @@ export class ArtworkManager {
 
     // Proximity detection
     this.proximityDistance = 5; // Distance at which artwork info appears
+    this.infoPanel.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        this.infoPanel.classList.toggle("expanded");
+      }
+    });
   }
 
   // Add a new artwork to the collection

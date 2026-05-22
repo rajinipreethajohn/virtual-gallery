@@ -687,11 +687,35 @@ canvas {
 
 @media (max-width: 768px) {
   #artwork-info {
-    left: 14px !important;
+    left: auto !important;
+
     right: 14px !important;
-    bottom: 18px !important;
-    max-width: none !important;
+
+    bottom: 120px !important;
+
+    max-width: 230px !important;
+
     width: auto !important;
-    padding: 12px 14px !important;
+
+    padding: 10px 12px !important;
+  }
+
+  #artwork-description {
+    display: -webkit-box !important;
+
+    -webkit-line-clamp: 2;
+
+    -webkit-box-orient: vertical;
+
+    overflow: hidden !important;
+
+    font-size: 0.95rem !important;
+
+    line-height: 1.35 !important;
+  }
+  #artwork-info.expanded #artwork-description {
+    -webkit-line-clamp: unset;
+
+    overflow: visible !important;
   }
 }
